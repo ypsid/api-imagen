@@ -4,7 +4,7 @@ import utils from "../utils/utils.js"
 const migrarPorLote = async (req, res) => {
   try {
     const { lote, nombre } = req.query
-    if (!lote || lote.lengt === 0) {
+    if (!lote || lote.length === 0) {
       return res.json({ message: "No hay lote para migrar" });
     }
     let responseSent = false;
@@ -12,7 +12,7 @@ const migrarPorLote = async (req, res) => {
     let cronologicosArray = [];
     let mensajes = []
     let codigo = {}
-    cronologicosArray = cronologicosArray.concat(await matriculasPorLoteId(lote));
+    cronologicosArray = cronologicosArray.concat(await utils.matriculasPorLoteId(lote));
     if (cronologicosArray.length === 0) {
       responseSent = true;
       return res.json({ message: `No hay cronologicos pendientes en el lote - ${nombre} ` });
@@ -24,7 +24,7 @@ const migrarPorLote = async (req, res) => {
         continue;
       }
 
-      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.marticula).length === 28 ? cronologico.matricula : cronologico.matricula + "0000");
+      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.matricula).length === 28 ? cronologico.matricula : cronologico.matricula + "0000");
 
       if (!cronologico.fichas || !Array.isArray(cronologico.fichas)) {
         console.warn(`⚠️ cronologico.fichas no es un array válido para cronologico: ${cronologico.matricula}`);
@@ -53,7 +53,7 @@ const migrarPorLote = async (req, res) => {
       return res.status(200).json({ lote, cronologicosArray, bases64, mensaje: mensajes, codigo });
     }
   } catch (err) {
-    console.error("❌ Error en /api/migrarCronologicoPorLote:", err);
+    console.error("❌ Error en /api/cronologico/migrar-por-lote:", err);
     res.status(500).json({ error: err.message });
   }
 }

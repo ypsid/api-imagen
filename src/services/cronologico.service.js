@@ -80,8 +80,8 @@ async function insertarCronologico(
     console.log('Cantidad total de paginas:', cantidadTotalPaginas)
     console.log('numero repeticion', nroRepeticion)
     console.log('nombre lote', nombreLote)
-    console.log('anverso', imgAnverso.map((imagen) => { imagen.id }))
-    console.log('reverso', imgReverso.map((imagen) => { imagen.id }))
+    console.log('anverso', imgAnverso.map((imagen) => { return { id: imagen.id, bufferAnverso } }))
+    console.log('reverso', imgReverso.map((imagen) => { return { id: imagen.id, bufferReverso } }))
     console.log('---------------------------------')
     return {
       resultado: result.outBinds.o_resultado,

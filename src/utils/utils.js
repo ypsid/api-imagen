@@ -1,70 +1,67 @@
-// const axios = require("axios-https-proxy-fix");
-import https from "https"; // Agrega esta línea para importar el módulo https
-import config from "dotenv"
+import dotenv from "dotenv";
 import axios from "axios";
+dotenv.config();
 
-const url = process.env.URL;
-
+if (!process.env.URL) {
+  throw new Error("process.env.URL no está definida. Revisa tu .env");
+}
 
 const axiosInstance = axios.create({
-  baseURL: "10.26.11.33:4001", // O la IP/URL donde corre tu servidor
-  timeout: 10000, // Tiempo de espera en milisegundos
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: process.env.URL,
+  timeout: 10000,
+  headers: { "Content-Type": "application/json" },
 });
+
+// Convierte array de imágenes base64 a buffer con prefijo de tamaño
 function concatenarBuffersConTamanio(imagenes) {
   const buffers = imagenes.map(img => {
-    const base64Data = img.base64.split(',')[1] || img.base64;
-    const buf = Buffer.from(base64Data, 'base64');
-    const sizeBuf = Buffer.alloc(4); // 4 bytes para tamanio
+    const base64Data = img.base64.split(",")[1] || img.base64;
+    const buf = Buffer.from(base64Data, "base64");
+    const sizeBuf = Buffer.alloc(4);
     sizeBuf.writeUInt32BE(buf.length);
     return Buffer.concat([sizeBuf, buf]);
   });
   return Buffer.concat(buffers);
 }
 
-
 async function lotesPorMigrar() {
   try {
-    const response = await axiosInstance.get(
-      `${url}/api/trpc/loteImagenes.lotesPorMigrar?input=%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D`
-    );
-    return response.data.result.data.json;
+    const resp = await axiosInstance.get("/api/trpc/loteImagenes.lotesPorMigrar?input=%7B%22json%22%3Anull%7D");
+    return resp.data?.result?.data?.json || [];
   } catch (err) {
-    console.error({ err });
-    throw new Error(`Ocurrió un error al obtener los lotes por migrar: ${err.message}`);
+    console.error("❌ Error lotesPorMigrar:", err.message);
+    return []; // retorna array vacío si falla
   }
 }
 
 async function matriculasPorLoteId(loteId) {
   try {
-    const response = await axiosInstance.get(
-      `${url}/api/trpc/loteImagenes.matriculasPorMigrar?input=%7B%22json%22%3A%7B%22loteId%22%3A%22${loteId}%22%7D%7D`
+    const resp = await axiosInstance.get(
+      `/api/trpc/loteImagenes.matriculasPorMigrar?input=${encodeURIComponent(
+        JSON.stringify({ json: { loteId } })
+      )}`
     );
-    return response.data.result.data.json;
+    const data = resp.data?.result?.data?.json;
+    return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error({ error: err.message });
-    throw new Error(`Ocurrió un error al obtener las matrículas por migrar: ${err.message}`);
+    console.error(`❌ Error en matriculasPorLoteId(${loteId}):`, err.message);
+    return [];
   }
 }
 
 async function imagenesPorHojaId(hojaId) {
   try {
-    const response = await axiosInstance.get(
-      `${url}/api/trpc/imagen.getTiffFromS3?input=%7B%22json%22%3A%7B%22hojaId%22%3A%22${hojaId}%22%7D%7D`
+    const resp = await axiosInstance.get(
+      `/api/trpc/imagen.getTiffFromS3?input=${encodeURIComponent(
+        JSON.stringify({ json: { hojaId } })
+      )}`
     );
-
-    if (!response.data || !response.data.result || !response.data.result.data) {
-      throw new Error("Respuesta inválida de la API");
-    }
-    return response.data.result.data.json;
+    return resp.data?.result?.data?.json || [];
   } catch (err) {
-    console.error(`Error en imagenesPorHojaId(${hojaId}):`, err.message);
-    throw new Error("Ocurrió un error al obtener las imágenes por migrar");
+    console.error(`❌ Error imagenesPorHojaId(${hojaId}):`, err.message);
+    return [];
   }
 }
-
 
 function transformarCodigo(codigo) {
   return {
@@ -73,6 +70,7 @@ function transformarCodigo(codigo) {
     numero_repeticion: parseInt(codigo.substring(15, 17)),
   };
 }
+
 function transformarCodigoCronologico(codigo) {
   return {
     tipoInsrcip: codigo.substring(0, 2),
@@ -82,8 +80,15 @@ function transformarCodigoCronologico(codigo) {
     nroRepeticion: parseInt(codigo.substring(19, 21)),
     nroVuelto: codigo.substring(21, 22),
     nroDpto: parseInt(codigo.substring(22, 24)),
-    nroTomoLe: parseInt(codigo.substring(24, 28)) !== NaN ? parseInt(codigo.substring(24, 28)) : 0
+    nroTomoLe: isNaN(parseInt(codigo.substring(24, 28))) ? 0 : parseInt(codigo.substring(24, 28)),
   };
 }
 
-export default { concatenarBuffersConTamanio, imagenesPorHojaId, matriculasPorLoteId, lotesPorMigrar, transformarCodigo, transformarCodigoCronologico };
+export default {
+  concatenarBuffersConTamanio,
+  lotesPorMigrar,
+  matriculasPorLoteId,
+  imagenesPorHojaId,
+  transformarCodigo,
+  transformarCodigoCronologico,
+};

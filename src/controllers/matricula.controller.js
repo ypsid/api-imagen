@@ -4,7 +4,7 @@ import utils from "../utils/utils.js"
 const migrarPorLote = async (req, res) => {
   try {
     const { lote, nombre } = req.query
-    if (!lote || lote.lengt === 0) {
+    if (!lote || lote.length === 0) {
       return res.json({ message: "No hay lote para migrar" });
     }
     let responseSent = false;
@@ -12,7 +12,7 @@ const migrarPorLote = async (req, res) => {
     let matriculasArray = [];
     let mensajes = []
     let codigo = {}
-    matriculasArray = matriculasArray.concat(await matriculasPorLoteId(lote));
+    matriculasArray = matriculasArray.concat(await utils.matriculasPorLoteId(lote));
 
     if (matriculasArray.length === 0) {
       responseSent = true;
