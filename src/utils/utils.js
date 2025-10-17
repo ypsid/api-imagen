@@ -13,15 +13,9 @@ const axiosInstance = axios.create({
 });
 
 // Convierte array de imágenes base64 a buffer con prefijo de tamaño
-function concatenarBuffersConTamanio(imagenes) {
-  const buffers = imagenes.map(img => {
-    const base64Data = img.base64.split(",")[1] || img.base64;
-    const buf = Buffer.from(base64Data, "base64");
-    const sizeBuf = Buffer.alloc(4);
-    sizeBuf.writeUInt32BE(buf.length);
-    return Buffer.concat([sizeBuf, buf]);
-  });
-  return Buffer.concat(buffers);
+function armarBuffer(imagen) {
+  const base64Data = imagen.base64.split(",")[1] || imagen.base64;
+  return Buffer.from(base64Data, "base64");
 }
 
 async function lotesPorMigrar() {
@@ -85,7 +79,7 @@ function transformarCodigoCronologico(codigo) {
 }
 
 export default {
-  concatenarBuffersConTamanio,
+  armarBuffer,
   lotesPorMigrar,
   matriculasPorLoteId,
   imagenesPorHojaId,

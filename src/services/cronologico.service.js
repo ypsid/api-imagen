@@ -22,14 +22,15 @@ async function insertarCronologico(
   nroTomoLe,
   nroFichas,
   cantidadTotalPaginas,
+  fichaActual,
   imgAnverso,
   imgReverso,
   nombreLote
 ) {
   try {
 
-    const bufferAnverso = utils.concatenarBuffersConTamanio(imgAnverso);
-    const bufferReverso = utils.concatenarBuffersConTamanio(imgReverso);
+    const bufferAnverso = utils.armarBuffer(imgAnverso);
+    const bufferReverso = utils.armarBuffer(imgReverso);
     const connection = await oracledb.getConnection(dbConfig);
 
     const bindParams = {
@@ -42,6 +43,7 @@ async function insertarCronologico(
       p_departamento: { val: nroDpto, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_tomo_le: { val: nroTomoLe, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       o_resultado: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 200 },
@@ -59,6 +61,7 @@ async function insertarCronologico(
           :P_DEPARTAMENTO,
           :P_TOMO_LE,
           :P_CANT_FICHAS,
+          :P_FICHA_ACTUAL,
           :P_IMAGEN_ANVERSO,
           :P_IMAGEN_REVERSO,
           :O_RESULTADO,
@@ -78,10 +81,11 @@ async function insertarCronologico(
     console.log('Numero Folio:', nroFolio)
     console.log('Numero Fichas:', nroFichas)
     console.log('Cantidad total de paginas:', cantidadTotalPaginas)
+    console.log('Ficha Actual:', fichaActual)
     console.log('numero repeticion', nroRepeticion)
     console.log('nombre lote', nombreLote)
-    console.log('anverso', imgAnverso.map((imagen) => { return { id: imagen.id, bufferAnverso } }))
-    console.log('reverso', imgReverso.map((imagen) => { return { id: imagen.id, bufferReverso } }))
+    console.log('anverso', bufferAnverso)
+    console.log('reverso', bufferReverso)
     console.log('---------------------------------')
     return {
       resultado: result.outBinds.o_resultado,

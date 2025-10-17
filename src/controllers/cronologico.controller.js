@@ -31,26 +31,27 @@ const migrarPorLote = async (req, res) => {
         continue;
       }
       let nroFichas = 0
-      let imgAnverso = [];
-      let imgReverso = [];
+      let imgAnverso = {};
+      let imgReverso = {};
       let cantidadTotalPaginas = 0;
+      let fichaActual = 0
 
       for (const ficha of cronologico.fichas) {
         const imgData = await utils.imagenesPorHojaId(ficha);
         if (imgData) {
-          bases64.push({ hojaId: ficha, imagenes: imgData });
-          imgAnverso.push(...imgData.filter(img => img.lado === 1 || img.lado === "1" || img.lado === "ANVERSO"));
-          imgReverso.push(...imgData.filter(img => img.lado === 2 || img.lado === "2" || img.lado === "REVERSO"));
+          imgAnverso = imgData.filter(img => img.lado === 1 || img.lado === "1" || img.lado === "ANVERSO")[0];
+          imgReverso = imgData.filter(img => img.lado === 2 || img.lado === "2" || img.lado === "REVERSO")[0];
           cantidadTotalPaginas += imgData.length;
         }
+        nroFichas = cronologico.fichas.length
+        fichaActual += 1
+        const insercionCronologico = await cronologicoService.insertarCronologico(tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe, nroFichas, cantidadTotalPaginas, fichaActual, imgAnverso, imgReverso, nombre);
+        mensajes.push(insercionCronologico)
+        codigo = insercionCronologico.codigo
       }
-      nroFichas = cronologico.fichas.length
-      const insercionCronologico = await cronologicoService.insertarCronologico(tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe, nroFichas, cantidadTotalPaginas, imgAnverso, imgReverso, nombre);
-      mensajes.push(insercionCronologico)
-      codigo = insercionCronologico.codigo
     }
     if (!responseSent) {
-      return res.status(200).json({ lote, cronologicosArray, bases64, mensaje: mensajes, codigo });
+      return res.status(200).json({ lote, cronologicosArray, mensaje: mensajes, codigo });
     }
   } catch (err) {
     console.error("❌ Error en /api/cronologico/migrar-por-lote:", err);
