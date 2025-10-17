@@ -8,7 +8,6 @@ const migrarPorLote = async (req, res) => {
       return res.json({ message: "No hay lote para migrar" });
     }
     let responseSent = false;
-    let bases64 = [];
     let cronologicosArray = [];
     let mensajes = []
     let codigo = {}
