@@ -44,7 +44,22 @@ const migrarPorLote = async (req, res) => {
         }
         nroFichas = cronologico.fichas.length
         fichaActual += 1
-        const insercionCronologico = await cronologicoService.insertarCronologico(tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe, nroFichas, cantidadTotalPaginas, fichaActual, imgAnverso, imgReverso, nombre);
+        const insercionCronologico = await cronologicoService.insertarCronologico(
+          tipoInsrcip,
+          nroOrden,
+          nroFolio,
+          nroAnio,
+          nroRepeticion,
+          vuelto,
+          nroDpto,
+          nroTomoLe,
+          nroFichas,
+          cantidadTotalPaginas,
+          fichaActual,
+          imgAnverso,
+          imgReverso,
+          nombre
+        );
         mensajes.push(insercionCronologico)
         codigo = insercionCronologico.codigo
       }

@@ -17,13 +17,14 @@ async function insertarMatricula(
   nombre_lote,
   nroFichas,
   cantidadTotalPaginas,
+  fichaActual,
   imgAnverso,
   imgReverso,
 ) {
   try {
 
-    const bufferAnverso = utils.concatenarBuffersConTamanio(imgAnverso);
-    const bufferReverso = utils.concatenarBuffersConTamanio(imgReverso);
+    const bufferAnverso = utils.armarBuffer(imgAnverso);
+    const bufferReverso = utils.armarBuffer(imgReverso);
 
     const connection = await oracledb.getConnection(dbConfig);
     const bindParams = {
@@ -34,6 +35,7 @@ async function insertarMatricula(
       p_nombre_lote: { val: String(nombre_lote) },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       o_result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
@@ -49,8 +51,9 @@ async function insertarMatricula(
         :p_numero_repeticion, 
         :p_nombre_lote, 
         :p_ficha_id, 
-        :p_cant_fichas, 
-        :p_imagen_anverso, 
+        :p_cant_fichas,
+        :p_ficha_actual,
+        :p_imagen_anverso,
         :p_imagen_reverso, 
         :o_result, 
         :o_mensaje
@@ -72,8 +75,9 @@ async function insertarMatricula(
     console.log('Numero matricula:', nromatricula)
     console.log('Numero Fichas:', nroFichas)
     console.log('Cantidad total de paginas:', cantidadTotalPaginas)
-    console.log('anverso', imgAnverso.map((imagen) => { imagen.id }))
-    console.log('reverso', imgReverso.map((imagen) => { imagen.id }))
+    console.log('Ficha Actual:', fichaActual)
+    console.log('anverso', bufferAnverso)
+    console.log('reverso', bufferReverso)
     console.log('---------------------------------')
     return {
       resultado: result.outBinds.o_result,
