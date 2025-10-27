@@ -29,8 +29,8 @@ const migrarPorLote = async (req, res) => {
       let cantidadTotalPaginas = 0;
       let fichaActual = 0
 
-      let { nromatricula, digitomatricula, numero_repeticion } = utils.transformarCodigo(matricula.matricula);
-
+      let { nromatricula, digitomatricula, numero_repeticion, tipoFicha } = utils.transformarCodigo(matricula.matricula);
+      console.log(matricula.matricula, "nromat:", nromatricula, "digito: ", digitomatricula, "nroRep:", numero_repeticion, "tipo: ", tipoFicha)
       if (!matricula.fichas || !Array.isArray(matricula.fichas)) {
         console.warn(`⚠️ matricula.fichas no es un array válido para matrícula: ${matricula.matricula}`);
         continue;
@@ -44,13 +44,14 @@ const migrarPorLote = async (req, res) => {
           cantidadTotalPaginas += imgData.length;
         }
       }
-      nroFichas = cronologico.fichas.length
+      nroFichas = matricula.fichas.length
       fichaActual += 1
 
       const insercionMatricula = await matriculaService.insertarMatricula(
         nromatricula,
         digitomatricula,
         numero_repeticion,
+        tipoFicha,
         nombre,
         nroFichas,
         cantidadTotalPaginas,

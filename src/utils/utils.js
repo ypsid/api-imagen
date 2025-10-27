@@ -62,6 +62,7 @@ function transformarCodigo(codigo) {
     nromatricula: parseInt(codigo.substring(2, 10)),
     digitomatricula: codigo.substring(10, 15),
     numero_repeticion: parseInt(codigo.substring(15, 17)),
+    tipoFicha: codigo.substring(17, 18)
   };
 }
 

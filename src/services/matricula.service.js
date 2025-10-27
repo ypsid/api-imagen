@@ -14,6 +14,7 @@ async function insertarMatricula(
   nromatricula,
   digitomatricula,
   numero_repeticion,
+  tipoFicha,
   nombre_lote,
   nroFichas,
   cantidadTotalPaginas,
@@ -29,10 +30,11 @@ async function insertarMatricula(
     const connection = await oracledb.getConnection(dbConfig);
     const bindParams = {
       p_tipoinscrip: { val: "FR" },
-      p_nromatricula: { val: Number(nromatricula) },
-      p_digitomatricula: { val: String(digitomatricula) },
-      p_numero_repeticion: { val: Number(numero_repeticion) },
-      p_nombre_lote: { val: String(nombre_lote) },
+      p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN, type: oracledb.STRING },
+      p_nombre_lote: { val: String(nombre_lote), dir: oracledb.BIND_IN, type: oracledb.STRING },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
