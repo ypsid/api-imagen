@@ -1,14 +1,6 @@
 import oracledb from "oracledb";
-import utils from "../utils/utils.js"
-const dbConfig = {
-  user: "URGP_DIGITAL",
-  password: "testpre",
-  connectString: `
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = TCP) (HOST = rgp-db-preprod.test.cba.gov.ar) (PORT = 1521))
-      (CONNECT_DATA = (SERVER = dedicated) (SERVICE_NAME = rgppre))
-    )`,
-};
+import utils from "../utils/utils.js";
+import { getConnection } from "../db.js";
 
 async function insertarMatricula(
   tipoInscrip,
@@ -21,24 +13,25 @@ async function insertarMatricula(
   cantidadTotalPaginas,
   fichaActual,
   imgAnverso,
-  imgReverso,
+  imgReverso
 ) {
+  let connection;
   try {
-
     const bufferAnverso = utils.armarBuffer(imgAnverso);
     const bufferReverso = utils.armarBuffer(imgReverso);
 
-    const connection = await oracledb.getConnection(dbConfig);
+    connection = await getConnection(); // ✅ usa el pool
+
     const bindParams = {
-      p_tipoinscrip: { val: String(tipoInscrip), dir: oracledb.BIND_IN, type: oracledb.STRING },
-      p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN, type: oracledb.STRING },
-      p_nombre_lote: { val: String(nombre_lote), dir: oracledb.BIND_IN, type: oracledb.STRING },
+      p_tipoinscrip: { val: String(tipoInscrip), dir: oracledb.BIND_IN },
+      p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN },
+      p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN },
+      p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN },
+      p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN },
+      p_nombre_lote: { val: String(nombre_lote), dir: oracledb.BIND_IN },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
-      p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
-      p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN },
+      p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       o_result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
@@ -47,59 +40,42 @@ async function insertarMatricula(
 
     const result = await connection.execute(
       `BEGIN
-        PKG_YPS_MATRICULAS.CREATE_MATRICULA_IMAGEN(
-        :p_tipoinscrip,
-        :p_nromatricula,
-        :p_digitomatricula,
-        :p_numero_repeticion,
-        :p_tipo_ficha,
-        :p_nombre_lote, 
-        :p_ficha_id, 
-        :p_cant_fichas,
-        :p_ficha_actual,
-        :p_imagen_anverso,
-        :p_imagen_reverso, 
-        :o_result, 
-        :o_mensaje
-        );
+         PKG_YPS_MATRICULAS.CREATE_MATRICULA_IMAGEN(
+           :p_tipoinscrip, :p_nromatricula, :p_digitomatricula, :p_numero_repeticion,
+           :p_tipo_ficha, :p_nombre_lote, :p_ficha_id, :p_cant_fichas, :p_ficha_actual,
+           :p_imagen_anverso, :p_imagen_reverso, :o_result, :o_mensaje
+         );
        END;`,
-      bindParams
+      bindParams,
+      { autoCommit: true } // 👈 importante
     );
-    console.log('RESPUESTA PL')
-    console.log('Ficha ID:', result.outBinds.p_ficha_id);
-    console.log('Resultado:', result.outBinds.p_result);
-    console.log('Mensaje:', result.outBinds.p_mensaje);
-    console.log('---')
-    await connection.close();
-    console.log('Datos enviados')
 
-    console.log('Tipo inscripción:', tipoInscrip)
-    console.log('Numero matricula:', nromatricula)
-    console.log('Digito matricula:', digitomatricula)
-    console.log('numero repeticion', numero_repeticion)
-    console.log('tipo ficha', tipoFicha)
-    console.log('nombre lote', nombre_lote)
-    console.log('Numero Fichas:', nroFichas)
-    console.log('Cantidad total de paginas:', cantidadTotalPaginas)
-    console.log('Ficha Actual:', fichaActual)
-    console.log('anverso', bufferAnverso)
-    console.log('reverso', bufferReverso)
-    console.log('---------------------------------')
+    console.log("✅ RESPUESTA PL");
+    console.log("Resultado:", result.outBinds.o_result);
+    console.log("Mensaje:", result.outBinds.o_mensaje);
+
     return {
       resultado: result.outBinds.o_result,
       mensaje: result.outBinds.o_mensaje,
-      ficha_id: result.outBinds.p_ficha_id,
       codigo: {
-        tipoInscirp: bindParams.p_tipoinscrip,
-        tipoMatricula: bindParams.p_nromatricula,
-        digitoMatricula: bindParams.p_digitomatricula,
-        numeroRepeticion: bindParams.p_numero_repeticion,
-      }
+        tipoInscrip: String(tipoInscrip),
+        tipoMatricula: Number(nromatricula),
+        digitoMatricula: Number(digitomatricula),
+        numeroRepeticion: Number(numero_repeticion),
+      },
     };
   } catch (err) {
     console.error("❌ Error al ejecutar el procedimiento almacenado:", err);
     throw new Error(`Error en la base de datos: ${err.message}`);
+  } finally {
+    if (connection) {
+      try {
+        await connection.close(); // ✅ siempre cerrar
+      } catch (e) {
+        console.error("Error cerrando conexión:", e);
+      }
+    }
   }
 }
 
-export default { insertarMatricula }
+export default { insertarMatricula };
