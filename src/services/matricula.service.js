@@ -53,7 +53,14 @@ async function insertarMatricula(
     console.log("✅ RESPUESTA PL");
     console.log("Resultado:", result.outBinds.o_result);
     console.log("Mensaje:", result.outBinds.o_mensaje);
-
+    console.log("---");
+    // Logs útiles (evitamos mostrar buffers grandes)
+    console.log("Tipo Inscripcion:", tipoInscrip);
+    console.log("Numero Matricula:", nromatricula);
+    console.log("Digito Matricula:", digitomatricula);
+    console.log("Numero Repeticion:", numero_repeticion);
+    console.log("Tipo Ficha:", tipoFicha);
+    console.log("Nombre Lote:", nombre_lote); // informativo si te sirve
     return {
       resultado: result.outBinds.o_result,
       mensaje: result.outBinds.o_mensaje,
