@@ -11,6 +11,7 @@ const dbConfig = {
 };
 
 async function insertarMatricula(
+  tipoInscrip,
   nromatricula,
   digitomatricula,
   numero_repeticion,
@@ -29,7 +30,7 @@ async function insertarMatricula(
 
     const connection = await oracledb.getConnection(dbConfig);
     const bindParams = {
-      p_tipoinscrip: { val: "FR" },
+      p_tipoinscrip: { val: String(tipoInscrip), dir: oracledb.BIND_IN, type: oracledb.STRING },
       p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN, type: oracledb.NUMBER },
@@ -72,10 +73,12 @@ async function insertarMatricula(
     await connection.close();
     console.log('Datos enviados')
 
+    console.log('Tipo inscripción:', tipoInscrip)
+    console.log('Numero matricula:', nromatricula)
     console.log('Digito matricula:', digitomatricula)
     console.log('numero repeticion', numero_repeticion)
+    console.log('tipo ficha', tipoFicha)
     console.log('nombre lote', nombre_lote)
-    console.log('Numero matricula:', nromatricula)
     console.log('Numero Fichas:', nroFichas)
     console.log('Cantidad total de paginas:', cantidadTotalPaginas)
     console.log('Ficha Actual:', fichaActual)
