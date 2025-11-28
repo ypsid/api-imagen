@@ -74,8 +74,8 @@ function transformarCodigoCronologico(codigo) {
     nroFolio: parseInt(codigo.substring(7, 15)),
     nroAnio: parseInt(codigo.substring(15, 19)),
     nroRepeticion: parseInt(codigo.substring(19, 21)),
-    nroVuelto: codigo.substring(21, 22),
-    nroDpto: parseInt(codigo.substring(22, 24)),
+    nroVuelto: "N",
+    nroDpto: 37,
     nroTomoLe: isNaN(parseInt(codigo.substring(24, 28))) ? 0 : parseInt(codigo.substring(24, 28)),
   };
 }

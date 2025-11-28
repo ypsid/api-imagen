@@ -72,8 +72,14 @@ async function insertarCronologico(
     console.log("---");
 
     // Logs útiles (evitamos mostrar buffers grandes)
+    console.log("Tipo Inscripcion:", tipoInsrcip);
     console.log("Numero Orden:", nroOrden);
     console.log("Numero Folio:", nroFolio);
+    console.log("Año:", nroAnio);
+    console.log("Numero Folio Bis:", nroRepeticion);
+    console.log("Vuelto:", vuelto);
+    console.log("Departamento:", nroDpto);
+    console.log("Tomo Legajo:", nroTomoLe);
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
     console.log("Numero Repeticion:", nroRepeticion);
