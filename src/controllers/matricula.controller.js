@@ -20,7 +20,7 @@ const migrarPorLote = async (req, res) => {
 
     for (const matricula of matriculasArray) {
       if (!matricula?.matricula) {
-        console.error("⚠️ Error: matricula.matricula es undefined o null");
+        console.error("⚠️ Error: matricula.nombre es undefined o null");
         continue;
       }
       let nroFichas = 0
@@ -29,10 +29,10 @@ const migrarPorLote = async (req, res) => {
       let cantidadTotalPaginas = 0;
       let fichaActual = 0
 
-      let { tipoInscrip, nromatricula, digitomatricula, numero_repeticion, tipoFicha } = utils.transformarCodigo(matricula.matricula);
+      let { tipoInscrip, nromatricula, digitomatricula, numero_repeticion, tipoFicha } = utils.transformarCodigo(matricula.nombre);
       console.log((tipoInscrip + nromatricula + digitomatricula + numero_repeticion + tipoFicha), "tipoInscrip", tipoInscrip, "nromat:", nromatricula, "digito: ", digitomatricula, "nroRep:", numero_repeticion, "tipo: ", tipoFicha)
       if (!matricula.fichas || !Array.isArray(matricula.fichas)) {
-        console.warn(`⚠️ matricula.fichas no es un array válido para matrícula: ${matricula.matricula}`);
+        console.warn(`⚠️ matricula.fichas no es un array válido para matrícula: ${matricula.nombre}`);
         continue;
       }
 

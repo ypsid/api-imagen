@@ -17,7 +17,7 @@ async function insertarCronologico(
   fichaActual,
   imgAnverso,
   imgReverso,
-  nombreLote // <- hoy no se usa en el paquete
+  nombre // <- hoy no se usa en el paquete
 ) {
   let connection;
   try {
@@ -83,7 +83,7 @@ async function insertarCronologico(
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
     console.log("Numero Repeticion:", nroRepeticion);
-    console.log("Nombre Lote:", nombreLote); // informativo si te sirve
+    console.log("Nombre Lote:", nombre); // informativo si te sirve
 
     return {
       resultado: result.outBinds.o_resultado,

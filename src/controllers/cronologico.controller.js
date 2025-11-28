@@ -23,10 +23,10 @@ const migrarPorLote = async (req, res) => {
         continue;
       }
 
-      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.matricula).length === 28 ? cronologico.matricula : cronologico.matricula + "0000");
+      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.nombre).length === 28 ? cronologico.nombre : cronologico.nombre + "0000");
 
       if (!cronologico.fichas || !Array.isArray(cronologico.fichas)) {
-        console.warn(`⚠️ cronologico.fichas no es un array válido para cronologico: ${cronologico.matricula}`);
+        console.warn(`⚠️ cronologico.fichas no es un array válido para cronologico: ${cronologico.nombre}`);
         continue;
       }
       let nroFichas = 0
@@ -58,7 +58,7 @@ const migrarPorLote = async (req, res) => {
           fichaActual,
           imgAnverso,
           imgReverso,
-          nombre
+          nombre,
         );
         mensajes.push(insercionCronologico)
         codigo = insercionCronologico.codigo
