@@ -1,21 +1,21 @@
 import matriculaService from "../services/matricula.service.js";
 import utils from "../utils/utils.js"
 
-const migrarPorLote = async (req, res) => {
+const migrarPorLibro = async (req, res) => {
   try {
-    const { lote, nombre } = req.query
-    if (!lote || lote.length === 0) {
-      return res.json({ message: "No hay lote para migrar" });
+    const { libro, nombre } = req.query
+    if (!libro || libro.length === 0) {
+      return res.json({ message: "No hay libro para migrar" });
     }
     let responseSent = false;
     let matriculasArray = [];
     let mensajes = []
     let codigo = {}
-    matriculasArray = matriculasArray.concat(await utils.matriculasPorLoteId(lote));
+    matriculasArray = matriculasArray.concat(await utils.matriculasPorLibroId(libro));
 
     if (matriculasArray.length === 0) {
       responseSent = true;
-      return res.json({ message: `No hay matriculas pendientes en el lote - ${nombre} ` });
+      return res.json({ message: `No hay matriculas pendientes en el libro - ${nombre} ` });
     }
 
     for (const matricula of matriculasArray) {
@@ -65,12 +65,12 @@ const migrarPorLote = async (req, res) => {
     }
     mensajes.map((msj) => { console.log(msj.mensaje) })
     if (!responseSent) {
-      return res.status(200).json({ lote, matriculasArray, mensaje: mensajes, codigo });
+      return res.status(200).json({ libro, matriculasArray, mensaje: mensajes, codigo });
     }
   } catch (err) {
-    console.error("❌ Error en /api/migrarPorLote:", err);
+    console.error("❌ Error en /api/migrarPorLibro:", err);
     res.status(500).json({ error: err.message });
   }
 }
 
-export default { migrarPorLote }
+export default { migrarPorLibro }

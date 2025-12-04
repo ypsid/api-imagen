@@ -13,7 +13,7 @@ async function insertarCronologico(
   nroDpto,
   nroTomoLe,
   nroFichas,
-  cantidadTotalPaginas, // <- hoy no se usa en el paquete
+  datos, // <- hoy no se usa en el paquete
   fichaActual,
   imgAnverso,
   imgReverso,
@@ -21,9 +21,13 @@ async function insertarCronologico(
 ) {
   let connection;
   try {
-    const bufferAnverso = utils.armarBuffer(imgAnverso);
-    const bufferReverso = utils.armarBuffer(imgReverso);
 
+
+    const bufferAnverso = imgAnverso ? utils.armarBuffer(imgAnverso) : null;
+    const bufferReverso = imgReverso ? utils.armarBuffer(imgReverso) : null;
+    console.log(bufferAnverso)
+    console.log(bufferReverso)
+    console.log(datos)
     connection = await getConnection(); // ✅ pool
 
     const bindParams = {
@@ -83,7 +87,8 @@ async function insertarCronologico(
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
     console.log("Numero Repeticion:", nroRepeticion);
-    console.log("Nombre Lote:", nombre); // informativo si te sirve
+    console.log("Nombre Libro:", nombre); // informativo si te sirve
+    // console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
 
     return {
       resultado: result.outBinds.o_resultado,

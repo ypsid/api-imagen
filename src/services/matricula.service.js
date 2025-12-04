@@ -8,7 +8,7 @@ async function insertarMatricula(
   digitomatricula,
   numero_repeticion,
   tipoFicha,
-  nombre_lote,
+  nombre_libro,
   nroFichas,
   cantidadTotalPaginas,
   fichaActual,
@@ -28,7 +28,7 @@ async function insertarMatricula(
       p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN },
       p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN },
-      p_nombre_lote: { val: String(nombre_lote), dir: oracledb.BIND_IN },
+      p_nombre_libro: { val: String(nombre_libro), dir: oracledb.BIND_IN },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN },
       p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN },
@@ -42,7 +42,7 @@ async function insertarMatricula(
       `BEGIN
          PKG_YPS_MATRICULAS.CREATE_MATRICULA_IMAGEN(
            :p_tipoinscrip, :p_nromatricula, :p_digitomatricula, :p_numero_repeticion,
-           :p_tipo_ficha, :p_nombre_lote, :p_ficha_id, :p_cant_fichas, :p_ficha_actual,
+           :p_tipo_ficha, :p_nombre_libro, :p_ficha_id, :p_cant_fichas, :p_ficha_actual,
            :p_imagen_anverso, :p_imagen_reverso, :o_result, :o_mensaje
          );
        END;`,
@@ -60,7 +60,7 @@ async function insertarMatricula(
     console.log("Digito Matricula:", digitomatricula);
     console.log("Numero Repeticion:", numero_repeticion);
     console.log("Tipo Ficha:", tipoFicha);
-    console.log("Nombre Lote:", nombre_lote); // informativo si te sirve
+    console.log("Nombre Libro:", nombre_libro); // informativo si te sirve
     return {
       resultado: result.outBinds.o_result,
       mensaje: result.outBinds.o_mensaje,

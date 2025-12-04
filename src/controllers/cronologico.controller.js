@@ -1,49 +1,67 @@
 import cronologicoService from "../services/cronologico.service.js";
 import utils from "../utils/utils.js"
 
-const migrarPorLote = async (req, res) => {
+const migrarPorLibro = async (req, res) => {
   try {
-    const { lote, nombre } = req.query
-    if (!lote || lote.length === 0) {
-      return res.json({ message: "No hay lote para migrar" });
+
+    const { libroId, nombre } = req.query
+    if (!libroId || libroId.length === 0) {
+      console.log(req)
+      return res.stats(400).json({ message: "No hay libro para migrar" });
     }
     let responseSent = false;
     let cronologicosArray = [];
     let mensajes = []
-    let codigo = {}
-    cronologicosArray = cronologicosArray.concat(await utils.matriculasPorLoteId(lote));
+    let codigoUltimo = null;
+    cronologicosArray = cronologicosArray.concat(await utils.matriculasPorLibroId(libroId))
+
     if (cronologicosArray.length === 0) {
       responseSent = true;
-      return res.json({ message: `No hay cronologicos pendientes en el lote - ${nombre} ` });
+      return res.json({ message: `No hay cronologicos pendientes en el libro - ${nombre} ` });
     }
 
     for (const cronologico of cronologicosArray) {
-      if (!cronologico?.matricula) {
-        console.error("⚠️ Error: cronologico.matricula es undefined o null");
+
+      if (!cronologico?.nombre) {
+        console.error("⚠️ Error: nombre del cronologico es undefined o null");
         continue;
       }
 
-      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.nombre).length === 28 ? cronologico.nombre : cronologico.nombre + "0000");
+      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.nombre).length === 21 ? cronologico.nombre : cronologico.nombre + "0000");
 
-      if (!cronologico.fichas || !Array.isArray(cronologico.fichas)) {
+      if (!cronologico.imagenes || !Array.isArray(cronologico.imagenes)) {
         console.warn(`⚠️ cronologico.fichas no es un array válido para cronologico: ${cronologico.nombre}`);
         continue;
       }
-      let nroFichas = 0
-      let imgAnverso = {};
-      let imgReverso = {};
-      let cantidadTotalPaginas = 0;
-      let fichaActual = 0
-
-      for (const ficha of cronologico.fichas) {
-        const imgData = await utils.imagenesPorHojaId(ficha);
-        if (imgData) {
-          imgAnverso = imgData.filter(img => img.lado === 1 || img.lado === "1" || img.lado === "ANVERSO")[0];
-          imgReverso = imgData.filter(img => img.lado === 2 || img.lado === "2" || img.lado === "REVERSO")[0];
-          cantidadTotalPaginas += imgData.length;
+      const imagenesDatos = [];
+      for (const imagenId of cronologico.imagenes) {
+        const imgData = await utils.obtenerImagenPorId(imagenId);
+        if (!imgData) {
+          console.warn(`⚠️ No se pudo obtener imagen ${imagenId}`);
+          continue;
         }
-        nroFichas = cronologico.fichas.length
-        fichaActual += 1
+        imagenesDatos.push(imgData);
+      }
+
+      if (imagenesDatos.length === 0) {
+        console.warn(`⚠️ No se obtuvieron TIFF para cronologico ${cronologico.nombre}`);
+        continue;
+      }
+
+      // 2) Separo anversos y reversos
+      const anversos = imagenesDatos.filter((img) => img.lado === 1);
+      const reversos = imagenesDatos.filter((img) => img.lado === 2);
+
+      const nroFichas = Math.max(anversos.length, reversos.length);
+      let fichaActual = 0;
+
+      // 3) Por cada "ficha" (par A/R) llamo al SP
+      for (let i = 0; i < nroFichas; i++) {
+        fichaActual++;
+
+        const imgAnverso = anversos[i] ?? null;
+        const imgReverso = reversos[i] ?? null;
+
         const insercionCronologico = await cronologicoService.insertarCronologico(
           tipoInsrcip,
           nroOrden,
@@ -54,24 +72,28 @@ const migrarPorLote = async (req, res) => {
           nroDpto,
           nroTomoLe,
           nroFichas,
-          cantidadTotalPaginas,
+          cronologico.datos, // cantidadTotalPaginas, si más adelante lo definís, lo cambiamos
           fichaActual,
           imgAnverso,
           imgReverso,
-          nombre,
+          nombre
         );
-        mensajes.push(insercionCronologico)
-        codigo = insercionCronologico.codigo
+
+        mensajes.push(insercionCronologico);
+        codigoUltimo = insercionCronologico.codigo;
       }
     }
-    if (!responseSent) {
-      return res.status(200).json({ lote, cronologicosArray, mensaje: mensajes, codigo });
-    }
+
+    return res.status(200).json({
+      libroId: Number(libroId),
+      libroNombre: nombre,
+      mensajes,
+      codigo: codigoUltimo,
+    });
   } catch (err) {
-    console.error("❌ Error en /api/cronologico/migrar-por-lote:", err);
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error en /api/cronologico/migrar-por-libro:", err);
+    return res.status(500).json({ error: err.message });
   }
-}
+};
 
-export default { migrarPorLote }
-
+export default { migrarPorLibro };

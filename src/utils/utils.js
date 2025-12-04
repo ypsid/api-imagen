@@ -8,9 +8,32 @@ if (!process.env.URL) {
 
 const axiosInstance = axios.create({
   baseURL: process.env.URL,
-  timeout: 10000,
-  headers: { "Content-Type": "application/json" },
+  timeout: 12000,
+  headers: {
+    "Content-Type": "application/json",
+    // "Authorization": "Proxy"
+  },
+  proxy: false
+  // proxy: {
+  //   host: "proxycba",
+  //   port: 8080,
+  //   // si tu proxy necesita auth:
+  //   auth: { username: "23434500109", password: "Bxigo2611&" },
+  // },
 });
+
+function logAxiosError(ctx, err) {
+  if (err.response) {
+    console.error(`❌ ${ctx} - status:`, err.response.status);
+    console.error(`   data:`, err.response.data);
+  } else if (err.request) {
+    console.error(`❌ ${ctx} - sin respuesta del servidor`);
+    console.error(`   code:`, err.code);
+  } else {
+    console.error(`❌ ${ctx} - error al armar request:`, err.message);
+  }
+}
+
 
 // Convierte array de imágenes base64 a buffer con prefijo de tamaño
 function armarBuffer(imagen) {
@@ -18,41 +41,43 @@ function armarBuffer(imagen) {
   return Buffer.from(base64Data, "base64");
 }
 
-async function lotesPorMigrar() {
+async function librosPorMigrar() {
   try {
-    const resp = await axiosInstance.get("/api/trpc/loteImagenes.lotesPorMigrar?input=%7B%22json%22%3Anull%7D");
+    const resp = await axiosInstance.get("/api/trpc/migracion.librosPorMigrar?input=%7B%22json%22%3Anull%7D");
     return resp.data?.result?.data?.json || [];
   } catch (err) {
-    console.error("❌ Error lotesPorMigrar:", err.message);
+    console.error("❌ Error librosPorMigrar:", err.message);
     return []; // retorna array vacío si falla
   }
 }
 
-async function matriculasPorLoteId(loteId) {
+async function matriculasPorLibroId(libroId) {
   try {
+    const input = { json: { libroId: parseInt(libroId) } };
+
     const resp = await axiosInstance.get(
-      `/api/trpc/loteImagenes.matriculasPorMigrar?input=${encodeURIComponent(
-        JSON.stringify({ json: { loteId } })
-      )}`
+      "/api/trpc/migracion.matriculasPorMigrar?input=" +
+      encodeURIComponent(JSON.stringify(input))
     );
     const data = resp.data?.result?.data?.json;
     return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error(`❌ Error en matriculasPorLoteId(${loteId}):`, err.message);
+    logAxiosError(`matriculasPorLibroId(${libroId})`, err);
     return [];
   }
 }
 
-async function imagenesPorHojaId(hojaId) {
+
+async function obtenerImagenPorId(imagenId) {
   try {
+    const input = { json: { imagenId: parseInt(imagenId) } };
     const resp = await axiosInstance.get(
-      `/api/trpc/imagen.getTiffFromS3?input=${encodeURIComponent(
-        JSON.stringify({ json: { hojaId } })
-      )}`
+      "/api/trpc/migracion.obtenerTiffDeImagenS3?input=" +
+      encodeURIComponent(JSON.stringify(input))
     );
-    return resp.data?.result?.data?.json || [];
+    return resp.data?.result?.data?.json;
   } catch (err) {
-    console.error(`❌ Error imagenesPorHojaId(${hojaId}):`, err.message);
+    logAxiosError(`obtenerImagenPorId(${imagenId})`, err);
     return [];
   }
 }
@@ -82,9 +107,9 @@ function transformarCodigoCronologico(codigo) {
 
 export default {
   armarBuffer,
-  lotesPorMigrar,
-  matriculasPorLoteId,
-  imagenesPorHojaId,
+  librosPorMigrar,
+  matriculasPorLibroId,
+  obtenerImagenPorId,
   transformarCodigo,
   transformarCodigoCronologico,
 };
