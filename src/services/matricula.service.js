@@ -7,10 +7,8 @@ async function insertarMatricula(
   nromatricula,
   digitomatricula,
   numero_repeticion,
-  // tipoFicha,
   nombre_libro,
   nroFichas,
-  // cantidadTotalPaginas,
   fichaActual,
   imgAnverso,
   imgReverso
@@ -26,8 +24,8 @@ async function insertarMatricula(
       p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN },
       p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN },
-      // p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN },
-      p_nombre_libro: { val: String(nombre_libro), dir: oracledb.BIND_IN },
+      p_tipo_ficha: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      p_nombre_lote: { val: String(nombre_libro), dir: oracledb.BIND_IN },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_cant_fichas: { val: Number(nroFichas), dir: oracledb.BIND_IN },
       p_ficha_actual: { val: Number(fichaActual), dir: oracledb.BIND_IN },
@@ -43,9 +41,9 @@ async function insertarMatricula(
             :p_tipoinscrip,
             :p_nromatricula,
             :p_digitomatricula,
-            :p_numero_repeticion, 
-
-            :p_nombre_libro,
+            :p_numero_repeticion,
+            :p_tipo_ficha,
+            :p_nombre_lote,
             :p_ficha_id,
             :p_cant_fichas,
             :p_ficha_actual,
@@ -69,7 +67,7 @@ async function insertarMatricula(
     console.log("Digito Matricula:", digitomatricula);
     console.log("Numero Repeticion:", numero_repeticion);
     // console.log("Tipo Ficha:", tipoFicha);
-    console.log("Nombre Libro:", nombre_libro); // informativo si te sirve
+    console.log("Nombre Libro/lote:", nombre_libro); // informativo si te sirve
     return {
       resultado: result.outBinds.o_result,
       mensaje: result.outBinds.o_mensaje,
