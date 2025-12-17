@@ -25,9 +25,6 @@ async function insertarCronologico(
 
     const bufferAnverso = imgAnverso ? utils.armarBuffer(imgAnverso) : null;
     const bufferReverso = imgReverso ? utils.armarBuffer(imgReverso) : null;
-    console.log(bufferAnverso)
-    console.log(bufferReverso)
-    console.log(datos)
     connection = await getConnection(); // ✅ pool
 
     const bindParams = {
@@ -36,7 +33,7 @@ async function insertarCronologico(
       p_folio: { val: Number(nroFolio), dir: oracledb.BIND_IN },
       p_anio: { val: Number(nroAnio), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(nroRepeticion), dir: oracledb.BIND_IN },
-      p_vuelto: { val: String(vuelto), dir: oracledb.BIND_IN },
+      p_vuelto: { val: "N", dir: oracledb.BIND_IN },
       p_departamento: { val: Number(nroDpto), dir: oracledb.BIND_IN },
       p_tomo_le: { val: Number(nroTomoLe), dir: oracledb.BIND_IN },
       p_cant_fichas: { val: Number(nroFichas), dir: oracledb.BIND_IN },

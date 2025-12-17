@@ -7,43 +7,52 @@ async function insertarMatricula(
   nromatricula,
   digitomatricula,
   numero_repeticion,
-  tipoFicha,
+  // tipoFicha,
   nombre_libro,
   nroFichas,
-  cantidadTotalPaginas,
+  // cantidadTotalPaginas,
   fichaActual,
   imgAnverso,
   imgReverso
 ) {
   let connection;
   try {
-    const bufferAnverso = utils.armarBuffer(imgAnverso);
-    const bufferReverso = utils.armarBuffer(imgReverso);
-
-    connection = await getConnection(); // ✅ usa el pool
+    const bufferAnverso = imgAnverso ? utils.armarBuffer(imgAnverso) : null;
+    const bufferReverso = imgReverso ? utils.armarBuffer(imgReverso) : null;
+    connection = await getConnection(); // ✅ pool
 
     const bindParams = {
       p_tipoinscrip: { val: String(tipoInscrip), dir: oracledb.BIND_IN },
       p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN },
       p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN },
-      p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN },
+      // p_tipo_ficha: { val: String(tipoFicha), dir: oracledb.BIND_IN },
       p_nombre_libro: { val: String(nombre_libro), dir: oracledb.BIND_IN },
       p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
-      p_cant_fichas: { val: nroFichas, dir: oracledb.BIND_IN },
-      p_ficha_actual: { val: fichaActual, dir: oracledb.BIND_IN },
+      p_cant_fichas: { val: Number(nroFichas), dir: oracledb.BIND_IN },
+      p_ficha_actual: { val: Number(fichaActual), dir: oracledb.BIND_IN },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       o_result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       o_mensaje: { dir: oracledb.BIND_OUT, type: oracledb.STRING },
     };
-
+    // :p_tipo_ficha,
     const result = await connection.execute(
       `BEGIN
          PKG_YPS_MATRICULAS.CREATE_MATRICULA_IMAGEN(
-           :p_tipoinscrip, :p_nromatricula, :p_digitomatricula, :p_numero_repeticion,
-           :p_tipo_ficha, :p_nombre_libro, :p_ficha_id, :p_cant_fichas, :p_ficha_actual,
-           :p_imagen_anverso, :p_imagen_reverso, :o_result, :o_mensaje
+            :p_tipoinscrip,
+            :p_nromatricula,
+            :p_digitomatricula,
+            :p_numero_repeticion, 
+
+            :p_nombre_libro,
+            :p_ficha_id,
+            :p_cant_fichas,
+            :p_ficha_actual,
+            :p_imagen_anverso,
+            :p_imagen_reverso,
+            :o_result,
+            :o_mensaje
          );
        END;`,
       bindParams,
@@ -59,7 +68,7 @@ async function insertarMatricula(
     console.log("Numero Matricula:", nromatricula);
     console.log("Digito Matricula:", digitomatricula);
     console.log("Numero Repeticion:", numero_repeticion);
-    console.log("Tipo Ficha:", tipoFicha);
+    // console.log("Tipo Ficha:", tipoFicha);
     console.log("Nombre Libro:", nombre_libro); // informativo si te sirve
     return {
       resultado: result.outBinds.o_result,
@@ -76,11 +85,8 @@ async function insertarMatricula(
     throw new Error(`Error en la base de datos: ${err.message}`);
   } finally {
     if (connection) {
-      try {
-        await connection.close(); // ✅ siempre cerrar
-      } catch (e) {
-        console.error("Error cerrando conexión:", e);
-      }
+      try { await connection.close(); } // ✅ devolver al pool
+      catch (e) { console.error("Error cerrando conexión:", e); }
     }
   }
 }

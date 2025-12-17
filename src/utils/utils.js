@@ -85,10 +85,10 @@ async function obtenerImagenPorId(imagenId) {
 function transformarCodigo(codigo) {
   return {
     tipoInscrip: "FR",
-    nromatricula: parseInt(codigo.substring(2, 10)),
-    digitomatricula: codigo.substring(10, 15),
-    numero_repeticion: parseInt(codigo.substring(15, 17)),
-    tipoFicha: codigo.substring(17, 18)
+    nromatricula: codigo.substring(0, 8),
+    digitomatricula: codigo.substring(8, 13),
+    numero_repeticion: codigo.substring(13, 15),
+    // tipoFicha: codigo.substring(17, 18)
   };
 }
 

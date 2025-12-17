@@ -21,7 +21,7 @@ const migrarPorLibro = async (req, res) => {
     }
 
     for (const cronologico of cronologicosArray) {
-
+      console.log(cronologico.datos)
       if (!cronologico?.nombre) {
         console.error("⚠️ Error: nombre del cronologico es undefined o null");
         continue;
@@ -30,7 +30,7 @@ const migrarPorLibro = async (req, res) => {
       let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.nombre).length === 21 ? cronologico.nombre : cronologico.nombre + "0000");
 
       if (!cronologico.imagenes || !Array.isArray(cronologico.imagenes)) {
-        console.warn(`⚠️ cronologico.fichas no es un array válido para cronologico: ${cronologico.nombre}`);
+        console.warn(`⚠️ cronologico.imagenes no es un array válido para cronologico: ${cronologico.nombre}`);
         continue;
       }
       const imagenesDatos = [];
@@ -65,7 +65,7 @@ const migrarPorLibro = async (req, res) => {
         const insercionCronologico = await cronologicoService.insertarCronologico(
           tipoInsrcip,
           nroOrden,
-          nroFolio,
+          (nroFolio + i),
           nroAnio,
           nroRepeticion,
           vuelto,
