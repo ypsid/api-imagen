@@ -7,13 +7,14 @@ async function insertarCronologico(
   tipoInsrcip,
   nroOrden,
   nroFolio,
+  bis,
   nroAnio,
-  nroRepeticion,
   vuelto,
   nroDpto,
   nroTomoLe,
   nroFichas,
   datos, // <- hoy no se usa en el paquete
+  cantidadTotalPaginas,
   fichaActual,
   imgAnverso,
   imgReverso,
@@ -32,7 +33,7 @@ async function insertarCronologico(
       p_nroorden: { val: Number(nroOrden), dir: oracledb.BIND_IN },
       p_folio: { val: Number(nroFolio), dir: oracledb.BIND_IN },
       p_anio: { val: Number(nroAnio), dir: oracledb.BIND_IN },
-      p_numero_repeticion: { val: Number(nroRepeticion), dir: oracledb.BIND_IN },
+      p_numero_repeticion: { val: Number(bis), dir: oracledb.BIND_IN },
       p_vuelto: { val: "N", dir: oracledb.BIND_IN },
       p_departamento: { val: Number(nroDpto), dir: oracledb.BIND_IN },
       p_tomo_le: { val: Number(nroTomoLe), dir: oracledb.BIND_IN },
@@ -77,15 +78,15 @@ async function insertarCronologico(
     console.log("Numero Orden:", nroOrden);
     console.log("Numero Folio:", nroFolio);
     console.log("Año:", nroAnio);
-    console.log("Numero Folio Bis:", nroRepeticion);
+    console.log("Numero Folio Bis:", bis);
     console.log("Vuelto:", vuelto);
     console.log("Departamento:", nroDpto);
     console.log("Tomo Legajo:", nroTomoLe);
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
-    console.log("Numero Repeticion:", nroRepeticion);
+    console.log("Numero Repeticion:", bis);
     console.log("Nombre Libro:", nombre); // informativo si te sirve
-    // console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
+    console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
 
     return {
       resultado: result.outBinds.o_resultado,
@@ -96,7 +97,7 @@ async function insertarCronologico(
         nroFolio,
         nroAnio,
         fichaActual,
-        nroRepeticion,
+        bis,
         vuelto,
         nroDpto,
         nroTomoLe,

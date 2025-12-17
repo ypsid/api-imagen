@@ -27,7 +27,7 @@ const migrarPorLibro = async (req, res) => {
         continue;
       }
 
-      let { tipoInsrcip, nroOrden, nroFolio, nroAnio, nroRepeticion, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(String(cronologico.nombre).length === 21 ? cronologico.nombre : cronologico.nombre + "0000");
+
 
       if (!cronologico.imagenes || !Array.isArray(cronologico.imagenes)) {
         console.warn(`⚠️ cronologico.imagenes no es un array válido para cronologico: ${cronologico.nombre}`);
@@ -58,21 +58,22 @@ const migrarPorLibro = async (req, res) => {
       // 3) Por cada "ficha" (par A/R) llamo al SP
       for (let i = 0; i < nroFichas; i++) {
         fichaActual++;
-
+        let { tipoInsrcip, nroOrden, nroFolio, bis, nroAnio, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(cronologico.datos, i);
         const imgAnverso = anversos[i] ?? null;
         const imgReverso = reversos[i] ?? null;
 
         const insercionCronologico = await cronologicoService.insertarCronologico(
           tipoInsrcip,
           nroOrden,
-          (nroFolio + i),
+          nroFolio,
+          bis,
           nroAnio,
-          nroRepeticion,
           vuelto,
           nroDpto,
           nroTomoLe,
           nroFichas,
-          cronologico.datos, // cantidadTotalPaginas, si más adelante lo definís, lo cambiamos
+          cronologico.datos,
+          imagenesDatos.length,// cantidadTotalPaginas, si más adelante lo definís, lo cambiamos
           fichaActual,
           imgAnverso,
           imgReverso,
