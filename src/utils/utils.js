@@ -92,16 +92,24 @@ function transformarCodigo(codigo) {
   };
 }
 
-function transformarCodigoCronologico(codigo) {
+function transformarCodigoCronologico(datos, i) {
+  const tipoInsrcip = datos.find((dato) => dato.campoEsquema.orden === 1).valor;
+  const nroOrden = datos.find((dato) => dato.campoEsquema.orden === 2).valor;
+  const armarFolioConBis = JSON.parse(datos.find((dato) => dato.campoEsquema.orden === 3).valor)
+  const nroFolio = armarFolioConBis[i].Folio
+  const bis = armarFolioConBis[i].Bis;
+  const nroAnio = datos.find((dato) => dato.campoEsquema.orden === 4).valor;
+  // const nroTomoLe = isNaN(parseInt(datos.substring(24, 28))) ? 0 : parseInt(datos.substring(24, 28));
+  console.log(`${tipoInsrcip}, ${nroOrden}, ${nroFolio}, ${bis}, ${nroAnio}`)
   return {
-    tipoInsrcip: codigo.substring(0, 2),
-    nroOrden: parseInt(codigo.substring(2, 7)),
-    nroFolio: parseInt(codigo.substring(7, 15)),
-    nroAnio: parseInt(codigo.substring(15, 19)),
-    nroRepeticion: parseInt(codigo.substring(19, 21)),
+    tipoInsrcip,
+    nroOrden,
+    nroFolio,
+    bis,
+    nroAnio,
     nroVuelto: "N",
     nroDpto: 37,
-    nroTomoLe: isNaN(parseInt(codigo.substring(24, 28))) ? 0 : parseInt(codigo.substring(24, 28)),
+    nroTomoLe: 0,
   };
 }
 
