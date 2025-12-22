@@ -13,7 +13,7 @@ const migrarPorLibro = async (req, res) => {
     let cronologicosArray = [];
     let mensajes = []
     let codigoUltimo = null;
-    cronologicosArray = cronologicosArray.concat(await utils.matriculasPorLibroId(libroId))
+    cronologicosArray = cronologicosArray.concat(await utils.docsPorLibroId(libroId))
 
     if (cronologicosArray.length === 0) {
       responseSent = true;

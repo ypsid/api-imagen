@@ -43,15 +43,53 @@ function armarBuffer(imagen) {
 
 async function librosPorMigrar() {
   try {
-    const resp = await axiosInstance.get("/api/trpc/migracion.librosPorMigrar?input=%7B%22json%22%3Anull%7D");
+    const resp = await axiosInstance.get("/api/trpc/migracion.librosPorMigrar");
     return resp.data?.result?.data?.json || [];
   } catch (err) {
-    console.error("❌ Error librosPorMigrar:", err.message);
+    logAxiosError(`librosPorMigrar`, err);
     return []; // retorna array vacío si falla
   }
 }
+async function migrarCronologico(libroId, libroNombre) {
+  const idNum = Number(libroId);
+  console.log(libroId, libroNombre)
+  if (!Number.isFinite(idNum)) throw new Error(`libroId inválido: ${libroId}`);
 
-async function matriculasPorLibroId(libroId) {
+  const body = {
+    0: { json: { libroId: idNum, libroNombre } },
+  };
+
+  const resp = await axiosInstance.post(
+    "/api/trpc/migracion.migrarCronologicoPorLibro?batch=1",
+    body,
+    { headers: { "content-type": "application/json" } },
+  );
+
+  // tRPC batch response is an array
+  return resp.data?.[0]?.result?.data?.json ?? [];
+}
+
+async function migrarMatricula(libroId, libroNombre) {
+  const idNum = Number(libroId);
+  console.log(libroId, libroNombre)
+  if (!Number.isFinite(idNum)) throw new Error(`libroId inválido: ${libroId}`);
+
+  const body = {
+    0: { json: { libroId: idNum, libroNombre } },
+  };
+
+  const resp = await axiosInstance.post(
+    "/api/trpc/migracion.migrarPorLibro?batch=1",
+    body,
+    { headers: { "content-type": "application/json" } },
+  );
+
+  // tRPC batch response is an array
+  return resp.data?.[0]?.result?.data?.json ?? [];
+}
+
+
+async function docsPorLibroId(libroId) {
   try {
     const input = { json: { libroId: parseInt(libroId) } };
 
@@ -62,8 +100,30 @@ async function matriculasPorLibroId(libroId) {
     const data = resp.data?.result?.data?.json;
     return Array.isArray(data) ? data : [];
   } catch (err) {
-    logAxiosError(`matriculasPorLibroId(${libroId})`, err);
+    logAxiosError(`docsPorLibroId(${libroId})`, err);
     return [];
+  }
+}
+async function migrarLibroPorId(libroId) {
+  const idNum = Number(libroId);
+  if (!Number.isFinite(idNum)) throw new Error(`libroId inválido: ${libroId}`);
+
+  const body = {
+    0: { json: idNum }, // 👈 input number directo
+  };
+
+  try {
+    const resp = await axiosInstance.post(
+      "/api/trpc/migracion.libroMigrado?batch=1",
+      body,
+      { headers: { "content-type": "application/json" } },
+    );
+
+    // batch => array
+    return resp.data?.[0]?.result?.data?.json ?? null;
+  } catch (err) {
+    logAxiosError(`libroMigrado(${libroId})`, err);
+    return null;
   }
 }
 
@@ -112,12 +172,44 @@ function transformarCodigoCronologico(datos, i) {
     nroTomoLe: 0,
   };
 }
+function spEsOk(valor) {
+  // casos comunes: 1 / 0 / "OK" / "0" / "1" / "S"
+  if (valor === null || valor === undefined) return false;
+
+  const v = String(valor).trim().toUpperCase();
+  return v === "OK" || v === "1" || v === "0" || v === "S" || v === "SUCCESS";
+}
+
+function mensajeEsOk(m) {
+  const r = m?.resultado;
+  if (r === null || r === undefined) return false;
+
+  // cronológico: "OK"
+  const rs = String(r).trim().toUpperCase();
+  if (rs === "OK" || rs === "SUCCESS" || rs === "S") return true;
+
+  // matrícula: suele ser número (1 ok, 0 ok según PL)
+  if (typeof r === "number") return r === 1; // si tu PL usa 0=OK, cambiá a r===0
+
+  // si viene como string numérica
+  if (!Number.isNaN(Number(rs))) return Number(rs) === 1;
+
+  // fallback por texto
+  const msg = String(m?.mensaje ?? "").toLowerCase();
+  if (msg.includes("correct")) return true; // "correctamente"
+  return false;
+}
 
 export default {
   armarBuffer,
   librosPorMigrar,
-  matriculasPorLibroId,
+  docsPorLibroId,
+  mensajeEsOk,
+  migrarCronologico,
+  migrarMatricula,
+  migrarLibroPorId,
   obtenerImagenPorId,
+  spEsOk,
   transformarCodigo,
   transformarCodigoCronologico,
 };

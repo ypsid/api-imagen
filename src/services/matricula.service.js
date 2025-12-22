@@ -69,6 +69,7 @@ async function insertarMatricula(
     // console.log("Tipo Ficha:", tipoFicha);
     console.log("Nombre Libro/lote:", nombre_libro); // informativo si te sirve
     return {
+      ok: utils.spEsOk(result.outBinds.o_result),
       resultado: result.outBinds.o_result,
       mensaje: result.outBinds.o_mensaje,
       codigo: {

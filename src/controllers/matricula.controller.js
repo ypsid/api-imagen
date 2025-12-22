@@ -11,7 +11,7 @@ const migrarPorLibro = async (req, res) => {
     let matriculasArray = [];
     let mensajes = []
     let codigoUltimo = null;
-    matriculasArray = matriculasArray.concat(await utils.matriculasPorLibroId(libroId));
+    matriculasArray = matriculasArray.concat(await utils.docsPorLibroId(libroId));
 
     if (matriculasArray.length === 0) {
       responseSent = true;
