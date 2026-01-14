@@ -20,7 +20,7 @@ const axiosInstance = axios.create({
 });
 
 export function iniciarJobMigracion() {
-  const BASE_URL = process.env.BASE_URL ?? "http://localhost:4001";
+  const BASE_URL = process.env.BASE_URL ?? "http://0.0.0.0:4001";
   console.log("🕒 Job migración registrado, próxima ejecución en el próximo cambio de hora");
   cron.schedule("0 * * * *", async () => {
     if (running) return;
