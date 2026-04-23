@@ -22,6 +22,21 @@ export async function getConnection() {
   return pool.getConnection();
 }
 
+export async function testConnection() {
+  let conn;
+
+  try {
+    conn = await getConnection();
+    await conn.execute(`SELECT 1 FROM DUAL`);
+    return true;
+  } catch (err) {
+    console.error("Oracle testConnection failed", err);
+    return false;
+  } finally {
+    if (conn) await conn.close();
+  }
+}
+
 export async function closePool() {
   if (pool) {
     await pool.close(10);
