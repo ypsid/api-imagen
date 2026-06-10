@@ -155,17 +155,19 @@ function transformarCodigo(codigo) {
 function transformarCodigoCronologico(datos, i) {
   const tipoInsrcip = datos.find((dato) => dato.campoEsquema.orden === 1).valor;
   const nroOrden = datos.find((dato) => dato.campoEsquema.orden === 2).valor;
-  const armarFolioConBis = JSON.parse(datos.find((dato) => dato.campoEsquema.orden === 3).valor)
+  const nroOrdenBis = datos.find((dato) => dato.campoEsquema.orden === 3).valor;
+  const armarFolioConBis = JSON.parse(datos.find((dato) => dato.campoEsquema.orden === 4).valor)
   const nroFolio = armarFolioConBis[i].Folio
-  const bis = armarFolioConBis[i].Bis;
-  const nroAnio = datos.find((dato) => dato.campoEsquema.orden === 4).valor;
+  const nroFolioBis = armarFolioConBis[i].Bis;
+  const nroAnio = datos.find((dato) => dato.campoEsquema.orden === 5).valor;
   // const nroTomoLe = isNaN(parseInt(datos.substring(24, 28))) ? 0 : parseInt(datos.substring(24, 28));
-  console.log(`${tipoInsrcip}, ${nroOrden}, ${nroFolio}, ${bis}, ${nroAnio}`)
+  console.log(`${tipoInsrcip}, ${nroOrden}, ${nroOrdenBis}, ${nroFolio}, ${nroFolioBis}, ${nroAnio}`)
   return {
     tipoInsrcip,
     nroOrden,
+    nroOrdenBis,
     nroFolio,
-    bis,
+    nroFolioBis,
     nroAnio,
     nroVuelto: "N",
     nroDpto: 37,

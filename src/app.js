@@ -4,7 +4,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import oracledb from "oracledb";
 
-oracledb.initOracleClient({ libDir: "C:\\oracle\\instantClient_21_20" });
+// oracledb.initOracleClient({ libDir: "C:\\oracle\\instantClient_21_20" });
+oracledb.initOracleClient({ libDir: "C:\\oracle\\instantClient_23_0" });
 
 import cronologicoRouter from "./routes/cronologico.routes.js";
 import matriculaRouter from "./routes/matricula.routes.js";
@@ -48,7 +49,7 @@ await test();
 if (process.env.ENABLE_CRON === "true") {
   iniciarJobMigracion();
 } else {
-console.log("Cron deshabilitado")
+  console.log("Cron deshabilitado")
 }
 
 app.listen(port, () => {

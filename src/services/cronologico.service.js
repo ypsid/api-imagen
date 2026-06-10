@@ -6,8 +6,9 @@ import { getConnection } from "../db.js";
 async function insertarCronologico(
   tipoInsrcip,
   nroOrden,
+  nroOrdenBis,
   nroFolio,
-  bis,
+  nroFolioBis,
   nroAnio,
   vuelto,
   nroDpto,
@@ -31,9 +32,10 @@ async function insertarCronologico(
     const bindParams = {
       p_tipoinscrip: { val: String(tipoInsrcip), dir: oracledb.BIND_IN },
       p_nroorden: { val: Number(nroOrden), dir: oracledb.BIND_IN },
+      p_orden_repeticion: { val: Number(nroOrdenBis), dir: oracledb.BIND_IN },
       p_folio: { val: Number(nroFolio), dir: oracledb.BIND_IN },
       p_anio: { val: Number(nroAnio), dir: oracledb.BIND_IN },
-      p_numero_repeticion: { val: Number(bis), dir: oracledb.BIND_IN },
+      p_numero_repeticion: { val: Number(nroFolioBis), dir: oracledb.BIND_IN },
       p_vuelto: { val: "N", dir: oracledb.BIND_IN },
       p_departamento: { val: Number(nroDpto), dir: oracledb.BIND_IN },
       p_tomo_le: { val: Number(nroTomoLe), dir: oracledb.BIND_IN },
@@ -50,6 +52,7 @@ async function insertarCronologico(
         PKG_YPS_CRONO.PR_INSERTAR_CRONOLOGICO(
           :P_TIPOINSCRIP,
           :P_NROORDEN,
+          :P_ORDEN_REPETICION,
           :P_FOLIO,
           :P_ANIO,
           :P_NUMERO_REPETICION,
@@ -76,9 +79,10 @@ async function insertarCronologico(
     // Logs útiles (evitamos mostrar buffers grandes)
     console.log("Tipo Inscripcion:", tipoInsrcip);
     console.log("Numero Orden:", nroOrden);
+    console.log("Numero Orden Bis:", nroOrdenBis);
     console.log("Numero Folio:", nroFolio);
     console.log("Año:", nroAnio);
-    console.log("Numero Folio Bis:", bis);
+    console.log("Numero Folio Bis:", nroFolioBis);
     console.log("Vuelto:", vuelto);
     console.log("Departamento:", nroDpto);
     console.log("Tomo Legajo:", nroTomoLe);
@@ -95,10 +99,11 @@ async function insertarCronologico(
       codigo: {
         tipoInsrcip,
         nroOrden,
+        nroOrdenBis,
         nroFolio,
         nroAnio,
         fichaActual,
-        bis,
+        nroFolioBis,
         vuelto,
         nroDpto,
         nroTomoLe,

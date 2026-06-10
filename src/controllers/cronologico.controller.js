@@ -58,15 +58,16 @@ const migrarPorLibro = async (req, res) => {
       // 3) Por cada "ficha" (par A/R) llamo al SP
       for (let i = 0; i < nroFichas; i++) {
         fichaActual++;
-        let { tipoInsrcip, nroOrden, nroFolio, bis, nroAnio, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(cronologico.datos, i);
+        let { tipoInsrcip, nroOrden, nroOrdenBis, nroFolio, nroFolioBis, nroAnio, vuelto, nroDpto, nroTomoLe } = utils.transformarCodigoCronologico(cronologico.datos, i);
         const imgAnverso = anversos[i] ?? null;
         const imgReverso = reversos[i] ?? null;
 
         const insercionCronologico = await cronologicoService.insertarCronologico(
           tipoInsrcip,
           nroOrden,
+          nroOrdenBis,
           nroFolio,
-          bis,
+          nroFolioBis,
           nroAnio,
           vuelto,
           nroDpto,
