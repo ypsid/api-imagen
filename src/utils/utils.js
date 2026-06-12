@@ -155,7 +155,7 @@ function transformarCodigo(codigo) {
 function transformarCodigoCronologico(datos, i) {
   const tipoInsrcip = datos.find((dato) => dato.campoEsquema.orden === 1).valor;
   const nroOrden = datos.find((dato) => dato.campoEsquema.orden === 2).valor;
-  const nroOrdenBis = datos.find((dato) => dato.campoEsquema.orden === 3).valor;
+  const nroOrdenBis = datos.find((dato) => dato.campoEsquema.orden === 3).valor ? Number(datos.find((dato) => dato.campoEsquema.orden === 3).valor) : 0;
   const armarFolioConBis = JSON.parse(datos.find((dato) => dato.campoEsquema.orden === 4).valor)
   const nroFolio = armarFolioConBis[i].Folio
   const nroFolioBis = armarFolioConBis[i].Bis;

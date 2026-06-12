@@ -32,7 +32,6 @@ async function insertarCronologico(
     const bindParams = {
       p_tipoinscrip: { val: String(tipoInsrcip), dir: oracledb.BIND_IN },
       p_nroorden: { val: Number(nroOrden), dir: oracledb.BIND_IN },
-      p_orden_repeticion: { val: Number(nroOrdenBis), dir: oracledb.BIND_IN },
       p_folio: { val: Number(nroFolio), dir: oracledb.BIND_IN },
       p_anio: { val: Number(nroAnio), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(nroFolioBis), dir: oracledb.BIND_IN },
@@ -43,6 +42,7 @@ async function insertarCronologico(
       p_ficha_actual: { val: Number(fichaActual), dir: oracledb.BIND_IN },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
+      p_OrdenRepetido: { val: Number(nroOrdenBis), dir: oracledb.BIND_IN },
       o_resultado: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 1000 },
       o_mensaje_error: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 1000 },
     };
@@ -52,7 +52,6 @@ async function insertarCronologico(
         PKG_YPS_CRONO.PR_INSERTAR_CRONOLOGICO(
           :P_TIPOINSCRIP,
           :P_NROORDEN,
-          :P_ORDEN_REPETICION,
           :P_FOLIO,
           :P_ANIO,
           :P_NUMERO_REPETICION,
@@ -63,6 +62,7 @@ async function insertarCronologico(
           :P_FICHA_ACTUAL,
           :P_IMAGEN_ANVERSO,
           :P_IMAGEN_REVERSO,
+          :P_ORDENREPETIDO,
           :O_RESULTADO,
           :O_MENSAJE_ERROR
         );
@@ -88,7 +88,6 @@ async function insertarCronologico(
     console.log("Tomo Legajo:", nroTomoLe);
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
-    console.log("Numero Repeticion:", bis);
     console.log("Nombre Libro:", nombre); // informativo si te sirve
     console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
 
