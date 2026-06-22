@@ -98,11 +98,12 @@ const migrarPorLibro = async (req, res) => {
         continue;
       }
 
-      if (folios.length !== nroFichas) {
+      const cantidadImagenesEsperadas = folios.length * 2;
+      if (imagenesDatos.length !== cantidadImagenesEsperadas) {
         mensajes.push({
           documentoId,
           resultado: "ERROR",
-          mensaje: `Cantidad inconsistente de folios e imágenes: folios ${folios.length}, fichas ${nroFichas}`,
+          mensaje: `Cantidad inconsistente de folios e imágenes: folios ${folios.length}, imágenes ${imagenesDatos.length}, esperadas ${cantidadImagenesEsperadas}, anversos ${anversos.length}, reversos ${reversos.length}`,
         });
         continue;
       }
