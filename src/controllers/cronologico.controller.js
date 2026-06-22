@@ -85,7 +85,6 @@ const migrarPorLibro = async (req, res) => {
       const anversos = imagenesDatos.filter((img) => img.lado === 1);
       const reversos = imagenesDatos.filter((img) => img.lado === 2);
 
-      const nroFichas = Math.max(anversos.length, reversos.length);
       let folios;
       try {
         folios = utils.obtenerFoliosCronologico(cronologico.datos);
@@ -98,12 +97,12 @@ const migrarPorLibro = async (req, res) => {
         continue;
       }
 
-      const cantidadImagenesEsperadas = folios.length * 2;
-      if (imagenesDatos.length !== cantidadImagenesEsperadas) {
+      const nroFichas = folios.length;
+      if (anversos.length > nroFichas || reversos.length > nroFichas) {
         mensajes.push({
           documentoId,
           resultado: "ERROR",
-          mensaje: `Cantidad inconsistente de folios e imágenes: folios ${folios.length}, imágenes ${imagenesDatos.length}, esperadas ${cantidadImagenesEsperadas}, anversos ${anversos.length}, reversos ${reversos.length}`,
+          mensaje: `Cantidad inconsistente de folios e imágenes: folios ${nroFichas}, anversos ${anversos.length}, reversos ${reversos.length}`,
         });
         continue;
       }
