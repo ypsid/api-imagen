@@ -3,24 +3,48 @@ import utils from "../utils/utils.js"
 
 const migrarPorLibro = async (req, res) => {
   try {
-    const { libroId, nombre } = req.query
+    const { libroId, nombre, documentoIds } = req.query
     if (!libroId || libroId.length === 0) {
       return res.json({ message: "No hay libroId para migrar" });
     }
-    let responseSent = false;
+    const documentoIdsFiltrados = utils.parseDocumentoIds(documentoIds);
     let matriculasArray = [];
     let mensajes = []
     let codigoUltimo = null;
     matriculasArray = matriculasArray.concat(await utils.docsPorLibroId(libroId));
+    if (documentoIdsFiltrados.length > 0) {
+      const idsEncontrados = new Set(matriculasArray.map((matricula) => Number(utils.obtenerDocumentoId(matricula))));
+      const idsNoEncontrados = documentoIdsFiltrados.filter((documentoId) => !idsEncontrados.has(Number(documentoId)));
+      mensajes = idsNoEncontrados.map((documentoId) => ({
+        documentoId,
+        resultado: "ERROR",
+        mensaje: "Documento no encontrado entre las matrículas pendientes del libro",
+      }));
+    }
+    matriculasArray = utils.filtrarDocumentosPorIds(matriculasArray, documentoIdsFiltrados);
 
     if (matriculasArray.length === 0) {
-      responseSent = true;
+      if (mensajes.length > 0) {
+        return res.status(200).json({
+          libroId: Number(libroId),
+          libroNombre: nombre,
+          mensajes,
+          codigo: codigoUltimo,
+        });
+      }
       return res.json({ message: `No hay matriculas pendientes en el libro - ${nombre} ` });
     }
 
     for (const matricula of matriculasArray) {
+      const documentoId = utils.obtenerDocumentoId(matricula);
+
       if (!matricula?.nombre) {
         console.error("⚠️ Error: nombre del cronologico es undefined o null");
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "Documento sin nombre",
+        });
         continue;
       }
       console.log(matricula.nombre)
@@ -34,6 +58,11 @@ const migrarPorLibro = async (req, res) => {
       )
       if (!matricula.imagenes || !Array.isArray(matricula.imagenes)) {
         console.warn(`⚠️ matricula.imagenes no es un array válido para matrícula: ${matricula.nombre}`);
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "matricula.imagenes no es un array válido",
+        });
         continue;
       }
 
@@ -47,7 +76,12 @@ const migrarPorLibro = async (req, res) => {
         imagenesDatos.push(imgData);
       }
       if (imagenesDatos.length === 0) {
-        console.warn(`⚠️ No se obtuvieron TIFF para cronologico ${cronologico.nombre}`);
+        console.warn(`⚠️ No se obtuvieron TIFF para matricula ${matricula.nombre}`);
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "No se obtuvieron TIFF para la matrícula",
+        });
         continue;
       }
 
@@ -57,6 +91,7 @@ const migrarPorLibro = async (req, res) => {
 
       const nroFichas = Math.max(anversos.length, reversos.length);
       let fichaActual = 0;
+      const mensajesFicha = [];
 
       for (let i = 0; i < nroFichas; i++) {
         fichaActual++;
@@ -75,9 +110,24 @@ const migrarPorLibro = async (req, res) => {
           imgAnverso,
           imgReverso,
         );
-        mensajes.push(insercionMatricula);
+        mensajesFicha.push(insercionMatricula);
         codigoUltimo = insercionMatricula.codigo;
       }
+
+      const fichasOk = mensajesFicha.filter(utils.mensajeEsOk).length;
+      const fichasError = mensajesFicha.length - fichasOk;
+      const documentoOk = mensajesFicha.length > 0 && fichasError === 0;
+
+      mensajes.push({
+        documentoId,
+        resultado: documentoOk ? "OK" : "ERROR",
+        mensaje: documentoOk
+          ? "Documento migrado correctamente"
+          : `Documento con errores: OK ${fichasOk}/${mensajesFicha.length}, ERROR ${fichasError}/${mensajesFicha.length}`,
+        fichasOk,
+        fichasError,
+        detalles: mensajesFicha,
+      });
     }
     mensajes.map((msj) => { console.log(msj.mensaje) })
     return res.status(200).json({

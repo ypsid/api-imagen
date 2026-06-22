@@ -88,6 +88,7 @@ async function insertarCronologico(
     console.log("Tomo Legajo:", nroTomoLe);
     console.log("Numero Fichas:", nroFichas);
     console.log("Ficha Actual:", fichaActual);
+    console.log("Numero Repeticion:", nroFolioBis);
     console.log("Nombre Libro:", nombre); // informativo si te sirve
     console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
 

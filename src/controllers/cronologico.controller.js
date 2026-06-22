@@ -4,26 +4,49 @@ import utils from "../utils/utils.js"
 const migrarPorLibro = async (req, res) => {
   try {
 
-    const { libroId, nombre } = req.query
+    const { libroId, nombre, documentoIds } = req.query
     if (!libroId || libroId.length === 0) {
       console.log(req)
-      return res.stats(400).json({ message: "No hay libro para migrar" });
+      return res.status(400).json({ message: "No hay libro para migrar" });
     }
-    let responseSent = false;
+    const documentoIdsFiltrados = utils.parseDocumentoIds(documentoIds);
     let cronologicosArray = [];
     let mensajes = []
     let codigoUltimo = null;
     cronologicosArray = cronologicosArray.concat(await utils.docsPorLibroId(libroId))
+    if (documentoIdsFiltrados.length > 0) {
+      const idsEncontrados = new Set(cronologicosArray.map((cronologico) => Number(utils.obtenerDocumentoId(cronologico))));
+      const idsNoEncontrados = documentoIdsFiltrados.filter((documentoId) => !idsEncontrados.has(Number(documentoId)));
+      mensajes = idsNoEncontrados.map((documentoId) => ({
+        documentoId,
+        resultado: "ERROR",
+        mensaje: "Documento no encontrado entre los cronológicos pendientes del libro",
+      }));
+    }
+    cronologicosArray = utils.filtrarDocumentosPorIds(cronologicosArray, documentoIdsFiltrados);
 
     if (cronologicosArray.length === 0) {
-      responseSent = true;
+      if (mensajes.length > 0) {
+        return res.status(200).json({
+          libroId: Number(libroId),
+          libroNombre: nombre,
+          mensajes,
+          codigo: codigoUltimo,
+        });
+      }
       return res.json({ message: `No hay cronologicos pendientes en el libro - ${nombre} ` });
     }
 
     for (const cronologico of cronologicosArray) {
+      const documentoId = utils.obtenerDocumentoId(cronologico);
       console.log(cronologico.datos)
       if (!cronologico?.nombre) {
         console.error("⚠️ Error: nombre del cronologico es undefined o null");
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "Documento sin nombre",
+        });
         continue;
       }
 
@@ -31,6 +54,11 @@ const migrarPorLibro = async (req, res) => {
 
       if (!cronologico.imagenes || !Array.isArray(cronologico.imagenes)) {
         console.warn(`⚠️ cronologico.imagenes no es un array válido para cronologico: ${cronologico.nombre}`);
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "cronologico.imagenes no es un array válido",
+        });
         continue;
       }
       const imagenesDatos = [];
@@ -45,6 +73,11 @@ const migrarPorLibro = async (req, res) => {
 
       if (imagenesDatos.length === 0) {
         console.warn(`⚠️ No se obtuvieron TIFF para cronologico ${cronologico.nombre}`);
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: "No se obtuvieron TIFF para el cronológico",
+        });
         continue;
       }
 
@@ -54,6 +87,7 @@ const migrarPorLibro = async (req, res) => {
 
       const nroFichas = Math.max(anversos.length, reversos.length);
       let fichaActual = 0;
+      const mensajesFicha = [];
 
       // 3) Por cada "ficha" (par A/R) llamo al SP
       for (let i = 0; i < nroFichas; i++) {
@@ -81,9 +115,24 @@ const migrarPorLibro = async (req, res) => {
           nombre
         );
 
-        mensajes.push(insercionCronologico);
+        mensajesFicha.push(insercionCronologico);
         codigoUltimo = insercionCronologico.codigo;
       }
+
+      const fichasOk = mensajesFicha.filter(utils.mensajeEsOk).length;
+      const fichasError = mensajesFicha.length - fichasOk;
+      const documentoOk = mensajesFicha.length > 0 && fichasError === 0;
+
+      mensajes.push({
+        documentoId,
+        resultado: documentoOk ? "OK" : "ERROR",
+        mensaje: documentoOk
+          ? "Documento migrado correctamente"
+          : `Documento con errores: OK ${fichasOk}/${mensajesFicha.length}, ERROR ${fichasError}/${mensajesFicha.length}`,
+        fichasOk,
+        fichasError,
+        detalles: mensajesFicha,
+      });
     }
 
     return res.status(200).json({

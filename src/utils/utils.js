@@ -41,6 +41,26 @@ function armarBuffer(imagen) {
   return Buffer.from(base64Data, "base64");
 }
 
+function parseDocumentoIds(documentoIds) {
+  if (!documentoIds) return [];
+
+  return String(documentoIds)
+    .split(",")
+    .map((id) => Number(id.trim()))
+    .filter(Number.isFinite);
+}
+
+function obtenerDocumentoId(documento) {
+  return documento?.id ?? documento?.documentoId ?? documento?.documento_id ?? null;
+}
+
+function filtrarDocumentosPorIds(documentos, documentoIds) {
+  if (!Array.isArray(documentos) || documentoIds.length === 0) return documentos;
+
+  const ids = new Set(documentoIds.map(Number));
+  return documentos.filter((documento) => ids.has(Number(obtenerDocumentoId(documento))));
+}
+
 async function librosPorMigrar() {
   try {
     const resp = await axiosInstance.get("/api/trpc/migracion.librosPorMigrar");
@@ -189,6 +209,7 @@ function mensajeEsOk(m) {
   // cronológico: "OK"
   const rs = String(r).trim().toUpperCase();
   if (rs === "OK" || rs === "SUCCESS" || rs === "S") return true;
+  if (rs === "ERROR" || rs === "FAIL" || rs === "FAILED") return false;
 
   // matrícula: suele ser número (1 ok, 0 ok según PL)
   if (typeof r === "number") return r === 1; // si tu PL usa 0=OK, cambiá a r===0
@@ -204,13 +225,16 @@ function mensajeEsOk(m) {
 
 export default {
   armarBuffer,
+  filtrarDocumentosPorIds,
   librosPorMigrar,
   docsPorLibroId,
   mensajeEsOk,
   migrarCronologico,
   migrarMatricula,
   migrarLibroPorId,
+  obtenerDocumentoId,
   obtenerImagenPorId,
+  parseDocumentoIds,
   spEsOk,
   transformarCodigo,
   transformarCodigoCronologico,
