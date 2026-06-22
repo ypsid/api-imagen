@@ -172,14 +172,38 @@ function transformarCodigo(codigo) {
   };
 }
 
+function obtenerFoliosCronologico(datos) {
+  const campoFolios = datos?.find((dato) => dato.campoEsquema?.orden === 4);
+  if (!campoFolios?.valor) {
+    throw new Error("El cronológico no tiene el campo Folios");
+  }
+
+  let folios;
+  try {
+    folios = JSON.parse(campoFolios.valor);
+  } catch {
+    throw new Error("El campo Folios del cronológico no tiene un JSON válido");
+  }
+
+  if (!Array.isArray(folios)) {
+    throw new Error("El campo Folios del cronológico no es un vector válido");
+  }
+
+  return folios;
+}
+
 function transformarCodigoCronologico(datos, i) {
-  const tipoInsrcip = datos.find((dato) => dato.campoEsquema.orden === 1).valor;
-  const nroOrden = datos.find((dato) => dato.campoEsquema.orden === 2).valor;
-  const nroOrdenBis = datos.find((dato) => dato.campoEsquema.orden === 3).valor ? Number(datos.find((dato) => dato.campoEsquema.orden === 3).valor) : 0;
-  const armarFolioConBis = JSON.parse(datos.find((dato) => dato.campoEsquema.orden === 4).valor)
-  const nroFolio = armarFolioConBis[i].Folio
-  const nroFolioBis = armarFolioConBis[i].Bis;
-  const nroAnio = datos.find((dato) => dato.campoEsquema.orden === 5).valor;
+  const tipoInsrcip = datos.find((dato) => dato.campoEsquema?.orden === 1)?.valor;
+  const nroOrden = datos.find((dato) => dato.campoEsquema?.orden === 2)?.valor;
+  const nroOrdenBis = datos.find((dato) => dato.campoEsquema?.orden === 3)?.valor ? Number(datos.find((dato) => dato.campoEsquema?.orden === 3).valor) : 0;
+  const armarFolioConBis = obtenerFoliosCronologico(datos);
+  const folioActual = armarFolioConBis[i];
+  if (!folioActual) {
+    throw new Error(`El cronológico no tiene folio para la ficha ${i + 1}`);
+  }
+  const nroFolio = folioActual.Folio;
+  const nroFolioBis = folioActual.Bis;
+  const nroAnio = datos.find((dato) => dato.campoEsquema?.orden === 5)?.valor;
   // const nroTomoLe = isNaN(parseInt(datos.substring(24, 28))) ? 0 : parseInt(datos.substring(24, 28));
   console.log(`${tipoInsrcip}, ${nroOrden}, ${nroOrdenBis}, ${nroFolio}, ${nroFolioBis}, ${nroAnio}`)
   return {
@@ -189,6 +213,7 @@ function transformarCodigoCronologico(datos, i) {
     nroFolio,
     nroFolioBis,
     nroAnio,
+    vuelto: "N",
     nroVuelto: "N",
     nroDpto: 37,
     nroTomoLe: 0,
@@ -234,6 +259,7 @@ export default {
   migrarLibroPorId,
   obtenerDocumentoId,
   obtenerImagenPorId,
+  obtenerFoliosCronologico,
   parseDocumentoIds,
   spEsOk,
   transformarCodigo,

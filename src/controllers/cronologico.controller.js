@@ -86,6 +86,27 @@ const migrarPorLibro = async (req, res) => {
       const reversos = imagenesDatos.filter((img) => img.lado === 2);
 
       const nroFichas = Math.max(anversos.length, reversos.length);
+      let folios;
+      try {
+        folios = utils.obtenerFoliosCronologico(cronologico.datos);
+      } catch (err) {
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: err?.message ?? "No se pudieron leer los folios del cronológico",
+        });
+        continue;
+      }
+
+      if (folios.length !== nroFichas) {
+        mensajes.push({
+          documentoId,
+          resultado: "ERROR",
+          mensaje: `Cantidad inconsistente de folios e imágenes: folios ${folios.length}, fichas ${nroFichas}`,
+        });
+        continue;
+      }
+
       let fichaActual = 0;
       const mensajesFicha = [];
 
