@@ -1,6 +1,20 @@
 import utils from "../utils/utils.js";
 function resumenDesdeRespuesta(data) {
   const mensajes = Array.isArray(data?.mensajes) ? data.mensajes : [];
+  const descripciones = mensajes.map((mensaje) => ({
+    documentoId: mensaje?.documentoId ?? null,
+    resultado: mensaje?.resultado ?? null,
+    descripcion: mensaje?.mensaje ?? "Sin descripcion",
+    fichasOk: mensaje?.fichasOk ?? null,
+    fichasError: mensaje?.fichasError ?? null,
+    detalles: Array.isArray(mensaje?.detalles)
+      ? mensaje.detalles.map((detalle) => ({
+        resultado: detalle?.resultado ?? null,
+        descripcion: detalle?.mensaje ?? detalle?.descripcion ?? "Sin descripcion",
+        codigo: detalle?.codigo ?? null,
+      }))
+      : [],
+  }));
 
   // caso “no hay pendientes”
   if (mensajes.length === 0) {
@@ -13,6 +27,7 @@ function resumenDesdeRespuesta(data) {
       fichasOk: 0,
       fichasError: 0,
       mensaje: data?.message ?? "No se migraron fichas (sin pendientes o salteadas)",
+      descripciones,
     };
   }
 
@@ -29,6 +44,7 @@ function resumenDesdeRespuesta(data) {
       fichasOk,
       fichasError,
       mensaje: `Migración fallida: OK ${fichasOk}/${mensajes.length}, ERROR ${fichasError}/${mensajes.length}`,
+      descripciones,
     };
   }
 
@@ -43,6 +59,7 @@ function resumenDesdeRespuesta(data) {
       fichasOk,
       fichasError,
       mensaje: `Migración parcial: OK ${fichasOk}/${mensajes.length}, ERROR ${fichasError}/${mensajes.length}`,
+      descripciones,
     };
   }
 
@@ -55,6 +72,7 @@ function resumenDesdeRespuesta(data) {
     fichasOk,
     fichasError: 0,
     mensaje: `Migración OK: ${fichasOk}/${mensajes.length}`,
+    descripciones,
   };
 }
 
@@ -114,11 +132,11 @@ const procesarLibros = async (librosAProcesar) => {
           // migración OK pero no se pudo marcar estado => warning
           resultados.push({
             ...base,
+            ...resumen,
             estado: "warning",
             ok: false,
             warning: true,
             error: false,
-            ...resumen,
             libroMarcadoMigrado: false,
             mensaje: `Migración OK pero falló marcar libro como migrado: ${e?.message ?? String(e)}`,
             codigo: data?.codigo ?? null,
@@ -126,14 +144,32 @@ const procesarLibros = async (librosAProcesar) => {
         }
         continue;
       }
+
+      resultados.push({
+        ...base,
+        ...resumen,
+        libroMarcadoMigrado: false,
+        codigo: data?.codigo ?? null,
+      });
     } catch (err) {
+      const mensaje = err?.message ?? String(err);
       resultados.push({
         ...base,
         estado: "error",
         ok: false,
         warning: false,
         error: true,
-        mensaje: err?.message ?? String(err),
+        mensaje,
+        descripciones: [
+          {
+            documentoId: null,
+            resultado: "ERROR",
+            descripcion: mensaje,
+            fichasOk: null,
+            fichasError: null,
+            detalles: [],
+          },
+        ],
       });
     }
   }
