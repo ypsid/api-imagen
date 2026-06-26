@@ -34,6 +34,12 @@ function logAxiosError(ctx, err) {
   }
 }
 
+function axiosErrorMessage(err) {
+  return err?.response?.data?.error?.json?.message
+    ?? err?.response?.data?.message
+    ?? err?.message
+    ?? "No se pudo obtener el detalle del error";
+}
 
 // Convierte array de imágenes base64 a buffer con prefijo de tamaño
 function armarBuffer(imagen) {
@@ -158,7 +164,11 @@ async function obtenerImagenPorId(imagenId) {
     return resp.data?.result?.data?.json;
   } catch (err) {
     logAxiosError(`obtenerImagenPorId(${imagenId})`, err);
-    return [];
+    return {
+      error: true,
+      imagenId: parseInt(imagenId),
+      mensaje: axiosErrorMessage(err),
+    };
   }
 }
 

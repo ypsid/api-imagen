@@ -67,10 +67,17 @@ const migrarPorLibro = async (req, res) => {
       }
 
       const imagenesDatos = [];
+      const erroresImagenes = [];
       for (const imagenId of matricula.imagenes) {
         const imgData = await utils.obtenerImagenPorId(imagenId);
-        if (!imgData) {
+        if (!imgData || imgData.error) {
           console.warn(`⚠️ No se pudo obtener imagen ${imagenId}`);
+          erroresImagenes.push({
+            imagenId,
+            resultado: "ERROR",
+            mensaje: imgData?.mensaje ?? "No se pudo obtener la imagen",
+            codigo: null,
+          });
           continue;
         }
         imagenesDatos.push(imgData);
@@ -81,6 +88,9 @@ const migrarPorLibro = async (req, res) => {
           documentoId,
           resultado: "ERROR",
           mensaje: "No se obtuvieron TIFF para la matrícula",
+          fichasOk: 0,
+          fichasError: erroresImagenes.length,
+          detalles: erroresImagenes,
         });
         continue;
       }
@@ -115,8 +125,9 @@ const migrarPorLibro = async (req, res) => {
       }
 
       const fichasOk = mensajesFicha.filter(utils.mensajeEsOk).length;
-      const fichasError = mensajesFicha.length - fichasOk;
+      const fichasError = mensajesFicha.length - fichasOk + erroresImagenes.length;
       const documentoOk = mensajesFicha.length > 0 && fichasError === 0;
+      const detalles = erroresImagenes.concat(mensajesFicha);
 
       mensajes.push({
         documentoId,
@@ -126,7 +137,7 @@ const migrarPorLibro = async (req, res) => {
           : `Documento con errores: OK ${fichasOk}/${mensajesFicha.length}, ERROR ${fichasError}/${mensajesFicha.length}`,
         fichasOk,
         fichasError,
-        detalles: mensajesFicha,
+        detalles,
       });
     }
     mensajes.map((msj) => { console.log(msj.mensaje) })
