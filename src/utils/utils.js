@@ -227,7 +227,7 @@ function transformarCodigoCronologico(datos, i) {
     nroAnio,
     vuelto: vuelto ?? "N",
     nroVuelto: "N",
-    nroDpto: nroDepartamento ?? "N",
+    nroDpto: nroDepartamento ?? 37,
     nroTomoLe: 0,
   };
 }
