@@ -214,6 +214,8 @@ function transformarCodigoCronologico(datos, i) {
   const nroFolio = folioActual.Folio;
   const nroFolioBis = folioActual.Bis;
   const nroAnio = datos.find((dato) => dato.campoEsquema?.orden === 5)?.valor;
+  const nroDepartamento = datos.find((dato) => dato.campoEsquema?.orden === 6)?.valor;
+  const vuelto = datos.find((dato) => dato.campoEsquema?.orden === 7)?.valor;
   // const nroTomoLe = isNaN(parseInt(datos.substring(24, 28))) ? 0 : parseInt(datos.substring(24, 28));
   console.log(`${tipoInsrcip}, ${nroOrden}, ${nroOrdenBis}, ${nroFolio}, ${nroFolioBis}, ${nroAnio}`)
   return {
@@ -223,9 +225,9 @@ function transformarCodigoCronologico(datos, i) {
     nroFolio,
     nroFolioBis,
     nroAnio,
-    vuelto: "N",
+    vuelto: vuelto ?? "N",
     nroVuelto: "N",
-    nroDpto: 37,
+    nroDpto: nroDepartamento ?? "N",
     nroTomoLe: 0,
   };
 }
