@@ -37,7 +37,7 @@ async function insertarMatricula(
     // :p_tipo_ficha,
     const result = await connection.execute(
       `BEGIN
-         PKG_YPS_MATRICULAS.CREATE_MATRICULA_IMAGEN(
+          PKG_MATRICULAS_NEW.CREATE_MATRICULA_IMAGEN(
             :p_tipoinscrip,
             :p_nromatricula,
             :p_digitomatricula,
