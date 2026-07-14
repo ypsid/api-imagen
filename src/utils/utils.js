@@ -240,6 +240,8 @@ function spEsOk(valor) {
 }
 
 function mensajeEsOk(m) {
+  if (typeof m?.ok === "boolean") return m.ok;
+
   const r = m?.resultado;
   if (r === null || r === undefined) return false;
 
@@ -248,11 +250,11 @@ function mensajeEsOk(m) {
   if (rs === "OK" || rs === "SUCCESS" || rs === "S") return true;
   if (rs === "ERROR" || rs === "FAIL" || rs === "FAILED") return false;
 
-  // matrícula: suele ser número (1 ok, 0 ok según PL)
-  if (typeof r === "number") return r === 1; // si tu PL usa 0=OK, cambiá a r===0
+  // PLs actuales: matrícula devuelve 0 en inserciones correctas.
+  if (typeof r === "number") return spEsOk(r);
 
   // si viene como string numérica
-  if (!Number.isNaN(Number(rs))) return Number(rs) === 1;
+  if (!Number.isNaN(Number(rs))) return spEsOk(rs);
 
   // fallback por texto
   const msg = String(m?.mensaje ?? "").toLowerCase();
