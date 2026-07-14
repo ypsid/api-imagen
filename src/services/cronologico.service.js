@@ -93,7 +93,7 @@ async function insertarCronologico(
     console.log("Cantidad de paginas:", cantidadTotalPaginas); // informativo si te sirve
 
     return {
-      ok: utils.spEsOk(result.outBinds.o_resultado) && !result.outBinds.o_mensaje_error,
+      ok: utils.spEsOk(result.outBinds.o_resultado),
       resultado: result.outBinds.o_resultado,
       mensaje: result.outBinds.o_mensaje_error,
       codigo: {
