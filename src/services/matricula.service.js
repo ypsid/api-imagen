@@ -22,33 +22,33 @@ async function insertarMatricula(
     const bindParams = {
       p_tipoinscrip: { val: String(tipoInscrip), dir: oracledb.BIND_IN },
       p_nromatricula: { val: Number(nromatricula), dir: oracledb.BIND_IN },
-      p_digitomatricula: { val: Number(digitomatricula), dir: oracledb.BIND_IN },
+      p_digitomatricula: { val: String(digitomatricula), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(numero_repeticion), dir: oracledb.BIND_IN },
-      p_tipo_ficha: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_nombre_lote: { val: String(nombre_libro), dir: oracledb.BIND_IN },
-      p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       p_cant_fichas: { val: Number(nroFichas), dir: oracledb.BIND_IN },
       p_ficha_actual: { val: Number(fichaActual), dir: oracledb.BIND_IN },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
       p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
+      p_tipo_ficha: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      p_ficha_id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       o_result: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       o_mensaje: { dir: oracledb.BIND_OUT, type: oracledb.STRING },
     };
     // :p_tipo_ficha,
     const result = await connection.execute(
       `BEGIN
-          PKG_MATRICULAS_NEW.CREATE_MATRICULA_IMAGEN(
+          PKG_MATRICULAS_NEW.PROCESAR_FICHA(
             :p_tipoinscrip,
             :p_nromatricula,
             :p_digitomatricula,
             :p_numero_repeticion,
-            :p_tipo_ficha,
             :p_nombre_lote,
-            :p_ficha_id,
             :p_cant_fichas,
             :p_ficha_actual,
             :p_imagen_anverso,
             :p_imagen_reverso,
+            :p_tipo_ficha,
+            :p_ficha_id,
             :o_result,
             :o_mensaje
          );
