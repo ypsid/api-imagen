@@ -35,9 +35,9 @@ async function insertarCronologico(
       p_folio: { val: Number(nroFolio), dir: oracledb.BIND_IN },
       p_anio: { val: Number(nroAnio), dir: oracledb.BIND_IN },
       p_numero_repeticion: { val: Number(nroFolioBis), dir: oracledb.BIND_IN },
-      p_vuelto: { val: "N", dir: oracledb.BIND_IN },
+      p_vuelto: { val: String(vuelto), dir: oracledb.BIND_IN },
       p_departamento: { val: Number(nroDpto), dir: oracledb.BIND_IN },
-      p_tomo_le: { val: Number(nroTomoLe), dir: oracledb.BIND_IN },
+      p_tomo_le: { val: nroTomoLe, dir: oracledb.BIND_IN },
       p_cant_fichas: { val: Number(nroFichas), dir: oracledb.BIND_IN },
       p_ficha_actual: { val: Number(fichaActual), dir: oracledb.BIND_IN },
       p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
@@ -49,7 +49,7 @@ async function insertarCronologico(
 
     const result = await connection.execute(
       `BEGIN
-        PKG_YPS_CRONO.PR_INSERTAR_CRONOLOGICO(
+        pkg_cronologico_new.digitalizar_folio(
           :P_TIPOINSCRIP,
           :P_NROORDEN,
           :P_FOLIO,
