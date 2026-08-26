@@ -104,6 +104,8 @@ const procesarLibros = async (librosAProcesar) => {
         data = await utils.migrarCronologico(base.id, base.nombre);
       } else if (base.tipo === "Matricula") {
         data = await utils.migrarMatricula(base.id, base.nombre);
+      } else if (base.tipo === "Planilla") {
+        data = await utils.migrarPlanilla(base.id, base.nombre);
       } else {
         resultados.push({
           ...base,

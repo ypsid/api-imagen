@@ -10,6 +10,7 @@ oracledb.initOracleClient({ libDir: "C:\\oracle\\instantClient_23_0" });
 import cronologicoRouter from "./routes/cronologico.routes.js";
 import matriculaRouter from "./routes/matricula.routes.js";
 import migracionRouter from "./routes/migracion.routes.js";
+import planillaRouter from "./routes/planilla.routes.js";
 import { iniciarJobMigracion } from "./jobs/migracion.job.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.set("trust proxy", true);
 app.use("/api/cronologico", cronologicoRouter);
 app.use("/api/matricula", matriculaRouter);
 app.use("/api/migracion", migracionRouter);
+app.use("/api/planilla", planillaRouter);
 
 async function test() {
   let conn;

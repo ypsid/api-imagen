@@ -22,6 +22,15 @@ const axiosInstance = axios.create({
   // },
 });
 
+const apiImagenInstance = axios.create({
+  baseURL: process.env.BASE_URL ?? "http://127.0.0.1:4001",
+  timeout: 60_000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  proxy: false,
+});
+
 function logAxiosError(ctx, err) {
   if (err.response) {
     console.error(`❌ ${ctx} - status:`, err.response.status);
@@ -112,6 +121,21 @@ async function migrarMatricula(libroId, libroNombre) {
 
   // tRPC batch response is an array
   return resp.data?.[0]?.result?.data?.json ?? [];
+}
+
+async function migrarPlanilla(libroId, libroNombre) {
+  const idNum = Number(libroId);
+  console.log(libroId, libroNombre)
+  if (!Number.isFinite(idNum)) throw new Error(`libroId inválido: ${libroId}`);
+
+  const resp = await apiImagenInstance.get("/api/planilla/migrar-por-libro", {
+    params: {
+      libroId: idNum,
+      nombre: libroNombre,
+    },
+  });
+
+  return resp.data ?? [];
 }
 
 
@@ -231,6 +255,28 @@ function transformarCodigoCronologico(datos, i) {
     nroTomoLe: 0,
   };
 }
+
+function transformarCodigoPlanilla(datos, i) {
+  const tipoInscrip = datos.find((dato) => dato.campoEsquema?.orden === 1)?.valor;
+  const nroOrden = datos.find((dato) => dato.campoEsquema?.orden === 2)?.valor;
+  const ordenRepetido = datos.find((dato) => dato.campoEsquema?.orden === 3)?.valor
+    ? Number(datos.find((dato) => dato.campoEsquema?.orden === 3).valor)
+    : 0;
+  const folios = obtenerFoliosCronologico(datos);
+  const folioActual = folios[i];
+  if (!folioActual) {
+    throw new Error(`La planilla no tiene folio para la ficha ${i + 1}`);
+  }
+
+  return {
+    tipoInscrip,
+    nroOrden,
+    ordenRepetido,
+    nroFolio: folioActual.Folio,
+    numeroRepeticion: folioActual.Bis ?? 0,
+  };
+}
+
 function spEsOk(valor) {
   // casos comunes: 1 / 0 / "OK" / "0" / "1" / "S"
   if (valor === null || valor === undefined) return false;
@@ -270,6 +316,7 @@ export default {
   mensajeEsOk,
   migrarCronologico,
   migrarMatricula,
+  migrarPlanilla,
   migrarLibroPorId,
   obtenerDocumentoId,
   obtenerImagenPorId,
@@ -278,4 +325,5 @@ export default {
   spEsOk,
   transformarCodigo,
   transformarCodigoCronologico,
+  transformarCodigoPlanilla,
 };
