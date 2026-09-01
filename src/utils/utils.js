@@ -226,6 +226,26 @@ function obtenerFoliosCronologico(datos) {
   return folios;
 }
 
+function obtenerFoliosPlanilla(datos) {
+  const campoFolios = datos?.find((dato) => dato.campoEsquema?.orden === 3);
+  if (!campoFolios?.valor) {
+    throw new Error("El cronológico no tiene el campo Folios");
+  }
+
+  let folios;
+  try {
+    folios = JSON.parse(campoFolios.valor);
+  } catch {
+    throw new Error("El campo Folios del cronológico no tiene un JSON válido");
+  }
+
+  if (!Array.isArray(folios)) {
+    throw new Error("El campo Folios del cronológico no es un vector válido");
+  }
+
+  return folios;
+}
+
 function transformarCodigoCronologico(datos, i) {
   const tipoInsrcip = datos.find((dato) => dato.campoEsquema?.orden === 1)?.valor;
   const nroOrden = datos.find((dato) => dato.campoEsquema?.orden === 2)?.valor;
@@ -257,11 +277,9 @@ function transformarCodigoCronologico(datos, i) {
 function transformarCodigoPlanilla(datos, i) {
   const tipoInscrip = datos.find((dato) => dato.campoEsquema?.orden === 1)?.valor;
   const nroOrden = datos.find((dato) => dato.campoEsquema?.orden === 2)?.valor;
-  const ordenRepetido = datos.find((dato) => dato.campoEsquema?.orden === 3)?.valor
-    ? Number(datos.find((dato) => dato.campoEsquema?.orden === 3).valor)
-    : 0;
-  const folios = obtenerFoliosCronologico(datos);
+  const folios = obtenerFoliosPlanilla(datos);
   const folioActual = folios[i];
+  console.log(folioActual)
   if (!folioActual) {
     throw new Error(`La planilla no tiene folio para la ficha ${i + 1}`);
   }
@@ -269,7 +287,6 @@ function transformarCodigoPlanilla(datos, i) {
   return {
     tipoInscrip,
     nroOrden,
-    ordenRepetido,
     nroFolio: folioActual.Folio,
     numeroRepeticion: folioActual.Bis ?? 0,
   };
@@ -319,6 +336,7 @@ export default {
   obtenerDocumentoId,
   obtenerImagenPorId,
   obtenerFoliosCronologico,
+  obtenerFoliosPlanilla,
   parseDocumentoIds,
   spEsOk,
   transformarCodigo,

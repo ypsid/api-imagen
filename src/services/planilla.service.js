@@ -6,7 +6,7 @@ async function cancelarLote(connection) {
   try {
     await connection.execute(
       `BEGIN
-        URGP.PKG_PLANILLA_NEW.CANCELAR_LOTE;
+        PKG_PLANILLA_NEW.CANCELAR_LOTE;
       END;`
     );
   } catch (err) {
@@ -35,14 +35,13 @@ async function procesarFicha(connection, ficha) {
     p_ficha_actual: { val: Number(ficha.fichaActual), dir: oracledb.BIND_IN },
     p_imagen_anverso: { val: bufferAnverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
     p_imagen_reverso: { val: bufferReverso, dir: oracledb.BIND_IN, type: oracledb.BLOB },
-    p_ordenrepetido: { val: Number(ficha.ordenRepetido ?? 0), dir: oracledb.BIND_IN },
     o_resultado: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 1000 },
     o_mensaje_error: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 1000 },
   };
 
   const result = await connection.execute(
     `BEGIN
-      URGP.PKG_PLANILLA_NEW.PROCESAR_FICHA(
+      PKG_PLANILLA_NEW.PROCESAR_FICHA(
         :p_tipoinscrip,
         :p_nroorden,
         :p_folio,
@@ -51,7 +50,6 @@ async function procesarFicha(connection, ficha) {
         :p_ficha_actual,
         :p_imagen_anverso,
         :p_imagen_reverso,
-        :p_ordenrepetido,
         :o_resultado,
         :o_mensaje_error
       );
@@ -66,7 +64,6 @@ async function procesarFicha(connection, ficha) {
   console.log("---");
   console.log("Tipo Inscripcion:", ficha.tipoInscrip);
   console.log("Numero Orden:", ficha.nroOrden);
-  console.log("Numero Orden Bis:", ficha.ordenRepetido);
   console.log("Numero Folio:", ficha.nroFolio);
   console.log("Numero Repeticion:", ficha.numeroRepeticion);
   console.log("Numero Fichas:", ficha.nroFichas);
@@ -79,7 +76,6 @@ async function procesarFicha(connection, ficha) {
     codigo: {
       tipoInscrip: ficha.tipoInscrip,
       nroOrden: Number(ficha.nroOrden),
-      ordenRepetido: Number(ficha.ordenRepetido ?? 0),
       nroFolio: Number(ficha.nroFolio),
       numeroRepeticion: Number(ficha.numeroRepeticion ?? 0),
       fichaActual: Number(ficha.fichaActual),

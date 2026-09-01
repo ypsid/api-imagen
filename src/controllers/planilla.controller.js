@@ -96,7 +96,7 @@ const migrarPorLibro = async (req, res) => {
 
       let folios;
       try {
-        folios = utils.obtenerFoliosCronologico(planilla.datos);
+        folios = utils.obtenerFoliosPlanilla(planilla.datos);
       } catch (err) {
         mensajes.push({
           documentoId,
